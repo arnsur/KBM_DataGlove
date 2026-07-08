@@ -22,10 +22,10 @@ extern lv_obj_t * ui_BatteryLevelLabelL;
 extern lv_obj_t * ui_BatteryLabelR;
 extern lv_obj_t * ui_BatteryLevelLabelR;
 extern lv_obj_t * ui_ModeLabel;
-extern void ui_event_SettingsButton_MainButtonTemplate(lv_event_t * e);
+extern void ui_event_SettingsButton(lv_event_t * e);
 extern lv_obj_t * ui_SettingsButton;
 extern lv_obj_t * ui_SettingsText;
-extern void ui_event_DevViewButton_MainButtonTemplate(lv_event_t * e);
+extern void ui_event_DevViewButton(lv_event_t * e);
 extern lv_obj_t * ui_DevViewButton;
 extern lv_obj_t * ui_DevViewText;
 // CUSTOM VARIABLES

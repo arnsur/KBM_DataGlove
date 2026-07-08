@@ -19,21 +19,21 @@ lv_obj_t * ui_SettingsText = NULL;
 lv_obj_t * ui_DevViewButton = NULL;
 lv_obj_t * ui_DevViewText = NULL;
 // event funtions
-void ui_event_SettingsButton_MainButtonTemplate(lv_event_t * e)
+void ui_event_SettingsButton(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_Settings, LV_SCR_LOAD_ANIM_NONE, 150, 0, &ui_Settings_screen_init);
+        _ui_screen_change(&ui_Settings, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_Settings_screen_init);
     }
 }
 
-void ui_event_DevViewButton_MainButtonTemplate(lv_event_t * e)
+void ui_event_DevViewButton(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_DevScreen, LV_SCR_LOAD_ANIM_NONE, 150, 0, &ui_DevScreen_screen_init);
+        _ui_screen_change(&ui_DevScreenR, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_DevScreenR_screen_init);
     }
 }
 
@@ -147,9 +147,24 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_style_text_align(ui_ModeLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_ModeLabel, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_SettingsButton = ui_MainButtonTemplate_create(ui_HomeScreen);
+    ui_SettingsButton = lv_btn_create(ui_HomeScreen);
+    lv_obj_set_width(ui_SettingsButton, 81);
+    lv_obj_set_height(ui_SettingsButton, 40);
     lv_obj_set_x(ui_SettingsButton, 113);
     lv_obj_set_y(ui_SettingsButton, 97);
+    lv_obj_set_align(ui_SettingsButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_SettingsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_FieldBG);
+    ui_object_set_themeable_style_property(ui_SettingsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_FieldBG);
+    ui_object_set_themeable_style_property(ui_SettingsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_COLOR,
+                                           _ui_theme_color_FieldBorder);
+    ui_object_set_themeable_style_property(ui_SettingsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA,
+                                           _ui_theme_alpha_FieldBorder);
+    lv_obj_set_style_border_width(ui_SettingsButton, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_SettingsButton, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_SettingsText = lv_label_create(ui_SettingsButton);
     lv_obj_set_width(ui_SettingsText, LV_SIZE_CONTENT);   /// 1
@@ -159,10 +174,24 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_style_text_color(ui_SettingsText, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_SettingsText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_move_to_index(ui_SettingsText, 0);
-    ui_DevViewButton = ui_MainButtonTemplate_create(ui_HomeScreen);
+    ui_DevViewButton = lv_btn_create(ui_HomeScreen);
+    lv_obj_set_width(ui_DevViewButton, 81);
+    lv_obj_set_height(ui_DevViewButton, 40);
     lv_obj_set_x(ui_DevViewButton, -113);
     lv_obj_set_y(ui_DevViewButton, 97);
+    lv_obj_set_align(ui_DevViewButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_DevViewButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_DevViewButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_DevViewButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_FieldBG);
+    ui_object_set_themeable_style_property(ui_DevViewButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_FieldBG);
+    ui_object_set_themeable_style_property(ui_DevViewButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_COLOR,
+                                           _ui_theme_color_FieldBorder);
+    ui_object_set_themeable_style_property(ui_DevViewButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA,
+                                           _ui_theme_alpha_FieldBorder);
+    lv_obj_set_style_border_width(ui_DevViewButton, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_DevViewButton, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_DevViewText = lv_label_create(ui_DevViewButton);
     lv_obj_set_width(ui_DevViewText, LV_SIZE_CONTENT);   /// 1
@@ -172,9 +201,8 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_style_text_color(ui_DevViewText, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_DevViewText, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_move_to_index(ui_DevViewText, 0);
-    lv_obj_add_event_cb(ui_SettingsButton, ui_event_SettingsButton_MainButtonTemplate, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_DevViewButton, ui_event_DevViewButton_MainButtonTemplate, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_SettingsButton, ui_event_SettingsButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_DevViewButton, ui_event_DevViewButton, LV_EVENT_ALL, NULL);
 
 }
 

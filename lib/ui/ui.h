@@ -23,8 +23,6 @@ extern "C" {
 #endif
 
 #include "ui_helpers.h"
-#include "ui_comp.h"
-#include "ui_comp_hook.h"
 #include "ui_events.h"
 #include "ui_theme_manager.h"
 #include "ui_themes.h"
@@ -34,7 +32,8 @@ extern "C" {
 #include "ui_SplashScreen.h"
 #include "ui_HomeScreen.h"
 #include "ui_Settings.h"
-#include "ui_DevScreen.h"
+#include "ui_DevScreenR.h"
+#include "ui_DevScreenL.h"
 
 ///////////////////// VARIABLES ////////////////////
 

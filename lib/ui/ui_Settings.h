@@ -15,9 +15,9 @@ extern void ui_Settings_screen_init(void);
 extern void ui_Settings_screen_destroy(void);
 extern lv_obj_t * ui_Settings;
 extern lv_obj_t * ui_TempSettingsLabel;
-extern void ui_event_MainButtonTemplate1_MainButtonTemplate(lv_event_t * e);
-extern lv_obj_t * ui_MainButtonTemplate1;
-extern lv_obj_t * ui_BackLabel;
+extern void ui_event_MainButtonTemplate(lv_event_t * e);
+extern lv_obj_t * ui_MainButtonTemplate;
+extern lv_obj_t * ui_BackLabel1;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

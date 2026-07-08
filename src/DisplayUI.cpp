@@ -42,76 +42,92 @@ void guiTask(void *pvParameters) {
             lv_tick_inc(time_now - time_last);
             time_last = time_now;
 
+            //----------------------------------MODE LABELS----------------------------------------------
             if (currentInputMode == 0) {
                 lv_label_set_text_fmt(ui_ModeLabel, "%d / %d", currentInputMode, currentMouseMode);
-                lv_label_set_text_fmt(ui_DevMiniModeLabel, "%d / %d", currentInputMode, currentMouseMode);
+                lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d / %d", currentInputMode, currentMouseMode);
+                lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d / %d", currentInputMode, currentMouseMode);
             } else {
                 lv_label_set_text_fmt(ui_ModeLabel, "%d", currentInputMode);
-                lv_label_set_text_fmt(ui_DevMiniModeLabel, "%d", currentInputMode);
+                lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d", currentInputMode);
+                lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d", currentInputMode);
             }
 
             //------------------------------------BATTERY LABELS---------------------------------------------
             lv_label_set_text_fmt(ui_BatteryLevelLabelL, "%d%%", shared_battery_l);
-            lv_label_set_text_fmt(ui_DevBatteryLevelLabelL, "%d%%", shared_battery_l);
             lv_label_set_text_fmt(ui_BatteryLevelLabelR, "%d%%", shared_battery_r);
-            lv_label_set_text_fmt(ui_DevBatteryLevelLabelR, "%d%%", shared_battery_r);
+            lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelL, "%d%%", shared_battery_l);
+            lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelR, "%d%%", shared_battery_r);
+            lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelL, "%d%%", shared_battery_l);
+            lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelR, "%d%%", shared_battery_r);
             if (shared_battery_l < 25) {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_l < 50) {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                
             } else if (shared_battery_l < 75) {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
 
             if (shared_battery_r < 25) {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_r < 50) {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_r < 75) {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else {
                 lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
 
             //------------------------------------RECEIVER CONNECTION LABELS---------------------------------------------
+            // Mini status bar does not get text changes so it stays condensed
             if (receiverConnected) {
                 lv_label_set_text(ui_ConStatusLabel, "ESP-NOW: CONNECTED");
                 lv_obj_set_style_text_color(ui_ConStatusLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-                // Mini status bar does not get text changes so it stays condensed
-                lv_obj_set_style_text_color(ui_DevConStatusLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else {
                 lv_label_set_text(ui_ConStatusLabel, "ESP-NOW: DISCONNECTED");
                 lv_obj_set_style_text_color(ui_ConStatusLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                // Mini status bar does not get text changes so it stays condensed
-                lv_obj_set_style_text_color(ui_DevConStatusLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
 
             //------------------------------------DEVELOPER SCREEN---------------------------------------------
-            lv_label_set_text_fmt(ui_FSRReadingsLabel, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)",
+            lv_label_set_text_fmt(ui_FSRReadingsLabelR, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)",
                 sensorValues[0], 100 *sensorValues[0]/4096,
                 sensorValues[1], 100 *sensorValues[1]/4096,
                 sensorValues[2], 100 *sensorValues[2]/4096,
                 sensorValues[3], 100 *sensorValues[3]/4096,
                 sensorValues[4], 100 *sensorValues[4]/4096);
-            lv_bar_set_value(ui_FSR0Bar, sensorValues[0], LV_ANIM_OFF);
-            lv_bar_set_value(ui_FSR1Bar, sensorValues[1], LV_ANIM_OFF);
-            lv_bar_set_value(ui_FSR2Bar, sensorValues[2], LV_ANIM_OFF);
-            lv_bar_set_value(ui_FSR3Bar, sensorValues[3], LV_ANIM_OFF);
-            lv_bar_set_value(ui_FSR4Bar, sensorValues[4], LV_ANIM_OFF);
+            lv_bar_set_value(ui_FSR0BarR, sensorValues[0], LV_ANIM_OFF);
+            lv_bar_set_value(ui_FSR1BarR, sensorValues[1], LV_ANIM_OFF);
+            lv_bar_set_value(ui_FSR2BarR, sensorValues[2], LV_ANIM_OFF);
+            lv_bar_set_value(ui_FSR3BarR, sensorValues[3], LV_ANIM_OFF);
+            lv_bar_set_value(ui_FSR4BarR, sensorValues[4], LV_ANIM_OFF);
 
             // Uncomment when all flex sensors are wired and NUM_SENSORS = 12
-            lv_label_set_text_fmt(ui_FlexReadingsLabel, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)"/*\n%d (%d%%)"*/,
+            lv_label_set_text_fmt(ui_FlexReadingsLabelR, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)"/*\n%d (%d%%)"*/,
                 sensorValues[5], 100 *sensorValues[5]/4096,
                 sensorValues[6], 100 *sensorValues[6]/4096,
                 sensorValues[7], 100 *sensorValues[7]/4096,
@@ -120,16 +136,15 @@ void guiTask(void *pvParameters) {
                 sensorValues[10], 100 *sensorValues[10]/4096);/*,
                 sensorValues[11], 100 *sensorValues[11]/4096);*/
             
-            lv_bar_set_value(ui_Flex5Bar, sensorValues[5], LV_ANIM_OFF);
-            lv_bar_set_value(ui_Flex6Bar, sensorValues[6], LV_ANIM_OFF);
-            lv_bar_set_value(ui_Flex7Bar, sensorValues[7], LV_ANIM_OFF);
-            lv_bar_set_value(ui_Flex8Bar, sensorValues[8], LV_ANIM_OFF);
-            lv_bar_set_value(ui_Flex9Bar, sensorValues[9], LV_ANIM_OFF);
-            lv_bar_set_value(ui_Flex10Bar, sensorValues[10], LV_ANIM_OFF);
+            lv_bar_set_value(ui_Flex5BarR, sensorValues[5], LV_ANIM_OFF);
+            lv_bar_set_value(ui_Flex6BarR, sensorValues[6], LV_ANIM_OFF);
+            lv_bar_set_value(ui_Flex7BarR, sensorValues[7], LV_ANIM_OFF);
+            lv_bar_set_value(ui_Flex8BarR, sensorValues[8], LV_ANIM_OFF);
+            lv_bar_set_value(ui_Flex9BarR, sensorValues[9], LV_ANIM_OFF);
+            lv_bar_set_value(ui_Flex10BarR, sensorValues[10], LV_ANIM_OFF);
             // lv_bar_set_value(ui_Flex11Bar, sensorValues[11], LV_ANIM_OFF);
 
-            lv_label_set_text_fmt(ui_DevUIMouseCoordsLabel, "X: %d\nY: %d", cursor_x, cursor_y);
-            lv_label_set_text_fmt(ui_IMUYawRollLabel, "Yaw: %.2f°\nRoll: %.2f°", smoothedYaw, smoothedRoll);
+            lv_label_set_text_fmt(ui_IMUYawRollLabelR, "Yaw: %.2f°\nRoll: %.2f°", smoothedYaw, smoothedRoll);
 
             lv_timer_handler();
             vTaskDelay(pdMS_TO_TICKS(30));
@@ -166,7 +181,8 @@ void initDisplay() {
     lv_indev_t * mouse_indev = lv_indev_drv_register(&indev_drv);
 
     ui_init();
-    lv_obj_clear_flag(lv_tabview_get_content(ui_DevTabView), LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(lv_tabview_get_content(ui_DevTabViewR), LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(lv_tabview_get_content(ui_DevTabViewL), LV_OBJ_FLAG_SCROLLABLE);
 
     lv_timer_handler();
     analogWrite(TFT_BL, 50);
