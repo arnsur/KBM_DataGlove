@@ -6,9 +6,17 @@
 #include "ui.h"
 
 lv_obj_t * ui_Settings = NULL;
-lv_obj_t * ui_TempSettingsLabel = NULL;
 lv_obj_t * ui_MainButtonTemplate = NULL;
 lv_obj_t * ui_BackLabel1 = NULL;
+lv_obj_t * ui_SettingsStatusBar = NULL;
+lv_obj_t * ui_SettingsLRecvConLabel = NULL;
+lv_obj_t * ui_SettingsRRecvConLabel = NULL;
+lv_obj_t * ui_SettingsLRConLabel = NULL;
+lv_obj_t * ui_SettingsBatteryContainer = NULL;
+lv_obj_t * ui_SettingsBatteryLabelL = NULL;
+lv_obj_t * ui_SettingsBatteryLevelLabelL = NULL;
+lv_obj_t * ui_SettingsBatteryLabelR = NULL;
+lv_obj_t * ui_SettingsBatteryLevelLabelR = NULL;
 // event funtions
 void ui_event_MainButtonTemplate(lv_event_t * e)
 {
@@ -27,15 +35,6 @@ void ui_Settings_screen_init(void)
     lv_obj_clear_flag(ui_Settings, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_Settings, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Settings, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_TempSettingsLabel = lv_label_create(ui_Settings);
-    lv_obj_set_width(ui_TempSettingsLabel, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_TempSettingsLabel, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_TempSettingsLabel, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_TempSettingsLabel, "SETTINGS\nNOTHING HERE RIGHT NOW");
-    lv_obj_set_style_text_color(ui_TempSettingsLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_TempSettingsLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_TempSettingsLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_MainButtonTemplate = lv_btn_create(ui_Settings);
     lv_obj_set_width(ui_MainButtonTemplate, 81);
@@ -64,6 +63,123 @@ void ui_Settings_screen_init(void)
     lv_obj_set_style_text_color(ui_BackLabel1, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_BackLabel1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_SettingsStatusBar = lv_obj_create(ui_Settings);
+    lv_obj_set_width(ui_SettingsStatusBar, 312);
+    lv_obj_set_height(ui_SettingsStatusBar, 50);
+    lv_obj_set_x(ui_SettingsStatusBar, 0);
+    lv_obj_set_y(ui_SettingsStatusBar, -91);
+    lv_obj_set_align(ui_SettingsStatusBar, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_SettingsStatusBar, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_SettingsStatusBar, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_FieldBG);
+    ui_object_set_themeable_style_property(ui_SettingsStatusBar, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_FieldBG);
+    ui_object_set_themeable_style_property(ui_SettingsStatusBar, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_COLOR,
+                                           _ui_theme_color_FieldBorder);
+    ui_object_set_themeable_style_property(ui_SettingsStatusBar, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA,
+                                           _ui_theme_alpha_FieldBorder);
+    lv_obj_set_style_border_width(ui_SettingsStatusBar, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_SettingsStatusBar, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsLRecvConLabel = lv_label_create(ui_SettingsStatusBar);
+    lv_obj_set_width(ui_SettingsLRecvConLabel, 83);
+    lv_obj_set_height(ui_SettingsLRecvConLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SettingsLRecvConLabel, -7);
+    lv_obj_set_y(ui_SettingsLRecvConLabel, -2);
+    lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV: \nDISCONNECTED");
+    lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SettingsLRecvConLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_SettingsLRecvConLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SettingsLRecvConLabel, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsRRecvConLabel = lv_label_create(ui_SettingsStatusBar);
+    lv_obj_set_width(ui_SettingsRRecvConLabel, 83);
+    lv_obj_set_height(ui_SettingsRRecvConLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SettingsRRecvConLabel, 80);
+    lv_obj_set_y(ui_SettingsRRecvConLabel, -2);
+    lv_label_set_text(ui_SettingsRRecvConLabel, "R<>RECV: \nDISCONNECTED");
+    lv_obj_set_style_text_color(ui_SettingsRRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SettingsRRecvConLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_SettingsRRecvConLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SettingsRRecvConLabel, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsLRConLabel = lv_label_create(ui_SettingsStatusBar);
+    lv_obj_set_width(ui_SettingsLRConLabel, 83);
+    lv_obj_set_height(ui_SettingsLRConLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SettingsLRConLabel, 167);
+    lv_obj_set_y(ui_SettingsLRConLabel, -2);
+    lv_label_set_text(ui_SettingsLRConLabel, "L<>R: \nDISCONNECTED");
+    lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SettingsLRConLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_SettingsLRConLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SettingsLRConLabel, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsBatteryContainer = lv_obj_create(ui_SettingsStatusBar);
+    lv_obj_remove_style_all(ui_SettingsBatteryContainer);
+    lv_obj_set_width(ui_SettingsBatteryContainer, 38);
+    lv_obj_set_height(ui_SettingsBatteryContainer, 40);
+    lv_obj_set_x(ui_SettingsBatteryContainer, 11);
+    lv_obj_set_y(ui_SettingsBatteryContainer, -11);
+    lv_obj_set_align(ui_SettingsBatteryContainer, LV_ALIGN_TOP_RIGHT);
+    lv_obj_clear_flag(ui_SettingsBatteryContainer,
+                      LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                      LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    ui_object_set_themeable_style_property(ui_SettingsBatteryContainer, LV_PART_MAIN | LV_STATE_DEFAULT,
+                                           LV_STYLE_BORDER_COLOR, _ui_theme_color_FieldBorder);
+    ui_object_set_themeable_style_property(ui_SettingsBatteryContainer, LV_PART_MAIN | LV_STATE_DEFAULT,
+                                           LV_STYLE_BORDER_OPA, _ui_theme_alpha_FieldBorder);
+    lv_obj_set_style_border_width(ui_SettingsBatteryContainer, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_SettingsBatteryContainer, LV_BORDER_SIDE_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsBatteryLabelL = lv_label_create(ui_SettingsBatteryContainer);
+    lv_obj_set_width(ui_SettingsBatteryLabelL, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SettingsBatteryLabelL, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SettingsBatteryLabelL, -26);
+    lv_obj_set_y(ui_SettingsBatteryLabelL, -9);
+    lv_obj_set_align(ui_SettingsBatteryLabelL, LV_ALIGN_RIGHT_MID);
+    lv_label_set_text(ui_SettingsBatteryLabelL, "L:");
+    lv_obj_set_style_text_color(ui_SettingsBatteryLabelL, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SettingsBatteryLabelL, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_SettingsBatteryLabelL, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SettingsBatteryLabelL, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsBatteryLevelLabelL = lv_label_create(ui_SettingsBatteryContainer);
+    lv_obj_set_width(ui_SettingsBatteryLevelLabelL, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SettingsBatteryLevelLabelL, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SettingsBatteryLevelLabelL, 1);
+    lv_obj_set_y(ui_SettingsBatteryLevelLabelL, -9);
+    lv_obj_set_align(ui_SettingsBatteryLevelLabelL, LV_ALIGN_RIGHT_MID);
+    lv_label_set_text(ui_SettingsBatteryLevelLabelL, "100%");
+    lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SettingsBatteryLevelLabelL, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_SettingsBatteryLevelLabelL, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SettingsBatteryLevelLabelL, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsBatteryLabelR = lv_label_create(ui_SettingsBatteryContainer);
+    lv_obj_set_width(ui_SettingsBatteryLabelR, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SettingsBatteryLabelR, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SettingsBatteryLabelR, -26);
+    lv_obj_set_y(ui_SettingsBatteryLabelR, 10);
+    lv_obj_set_align(ui_SettingsBatteryLabelR, LV_ALIGN_RIGHT_MID);
+    lv_label_set_text(ui_SettingsBatteryLabelR, "R:");
+    lv_obj_set_style_text_color(ui_SettingsBatteryLabelR, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SettingsBatteryLabelR, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_SettingsBatteryLabelR, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SettingsBatteryLabelR, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsBatteryLevelLabelR = lv_label_create(ui_SettingsBatteryContainer);
+    lv_obj_set_width(ui_SettingsBatteryLevelLabelR, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SettingsBatteryLevelLabelR, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SettingsBatteryLevelLabelR, 1);
+    lv_obj_set_y(ui_SettingsBatteryLevelLabelR, 10);
+    lv_obj_set_align(ui_SettingsBatteryLevelLabelR, LV_ALIGN_RIGHT_MID);
+    lv_label_set_text(ui_SettingsBatteryLevelLabelR, "100%");
+    lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_SettingsBatteryLevelLabelR, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_SettingsBatteryLevelLabelR, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SettingsBatteryLevelLabelR, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     lv_obj_add_event_cb(ui_MainButtonTemplate, ui_event_MainButtonTemplate, LV_EVENT_ALL, NULL);
 
 }
@@ -74,8 +190,16 @@ void ui_Settings_screen_destroy(void)
 
     // NULL screen variables
     ui_Settings = NULL;
-    ui_TempSettingsLabel = NULL;
     ui_MainButtonTemplate = NULL;
     ui_BackLabel1 = NULL;
+    ui_SettingsStatusBar = NULL;
+    ui_SettingsLRecvConLabel = NULL;
+    ui_SettingsRRecvConLabel = NULL;
+    ui_SettingsLRConLabel = NULL;
+    ui_SettingsBatteryContainer = NULL;
+    ui_SettingsBatteryLabelL = NULL;
+    ui_SettingsBatteryLevelLabelL = NULL;
+    ui_SettingsBatteryLabelR = NULL;
+    ui_SettingsBatteryLevelLabelR = NULL;
 
 }

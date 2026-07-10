@@ -14,14 +14,16 @@ extern FingerProfile ringProfile;
 // A0:F2:62:F2:2B:70 -- SuperMini ESP32-S3
 const uint8_t RECEIVER_ADDRESS[] = {0xA0, 0xF2, 0x62, 0xF2, 0x2B, 0x70};
 esp_now_peer_info_t peerInfo;
-volatile bool receiverConnected = false;
+volatile bool rRecvConnected = false;
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  if (status == ESP_NOW_SEND_SUCCESS) {
-    receiverConnected = true;
-  } else {
-    receiverConnected = false;
-  }
+    if (memcmp(mac_addr, RECEIVER_ADDRESS, 6) == 0) {
+        if (status == ESP_NOW_SEND_SUCCESS) {
+            rRecvConnected = true;
+        } else {
+            rRecvConnected = false;
+        }
+    }
 }
 
 void initComms() {

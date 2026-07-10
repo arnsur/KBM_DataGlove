@@ -14,10 +14,18 @@ extern "C" {
 extern void ui_Settings_screen_init(void);
 extern void ui_Settings_screen_destroy(void);
 extern lv_obj_t * ui_Settings;
-extern lv_obj_t * ui_TempSettingsLabel;
 extern void ui_event_MainButtonTemplate(lv_event_t * e);
 extern lv_obj_t * ui_MainButtonTemplate;
 extern lv_obj_t * ui_BackLabel1;
+extern lv_obj_t * ui_SettingsStatusBar;
+extern lv_obj_t * ui_SettingsLRecvConLabel;
+extern lv_obj_t * ui_SettingsRRecvConLabel;
+extern lv_obj_t * ui_SettingsLRConLabel;
+extern lv_obj_t * ui_SettingsBatteryContainer;
+extern lv_obj_t * ui_SettingsBatteryLabelL;
+extern lv_obj_t * ui_SettingsBatteryLevelLabelL;
+extern lv_obj_t * ui_SettingsBatteryLabelR;
+extern lv_obj_t * ui_SettingsBatteryLevelLabelR;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

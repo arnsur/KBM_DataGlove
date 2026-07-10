@@ -10,7 +10,7 @@ extern volatile int currentInputMode;
 extern volatile int currentMouseMode;
 extern volatile int shared_battery_l;
 extern volatile int shared_battery_r;
-extern volatile bool receiverConnected;
+extern volatile bool rRecvConnected;
 extern volatile int sensorValues[];
 extern volatile int16_t cursor_x;
 extern volatile int16_t cursor_y;
@@ -44,73 +44,73 @@ void guiTask(void *pvParameters) {
 
             //----------------------------------MODE LABELS----------------------------------------------
             if (currentInputMode == 0) {
-                lv_label_set_text_fmt(ui_ModeLabel, "%d / %d", currentInputMode, currentMouseMode);
+                lv_label_set_text_fmt(ui_HomeModeLabel, "%d / %d", currentInputMode, currentMouseMode);
                 lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d / %d", currentInputMode, currentMouseMode);
                 lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d / %d", currentInputMode, currentMouseMode);
             } else {
-                lv_label_set_text_fmt(ui_ModeLabel, "%d", currentInputMode);
+                lv_label_set_text_fmt(ui_HomeModeLabel, "%d", currentInputMode);
                 lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d", currentInputMode);
                 lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d", currentInputMode);
             }
 
             //------------------------------------BATTERY LABELS---------------------------------------------
-            lv_label_set_text_fmt(ui_BatteryLevelLabelL, "%d%%", shared_battery_l);
-            lv_label_set_text_fmt(ui_BatteryLevelLabelR, "%d%%", shared_battery_r);
+            lv_label_set_text_fmt(ui_HomeBatteryLevelLabelL, "%d%%", shared_battery_l);
+            lv_label_set_text_fmt(ui_HomeBatteryLevelLabelR, "%d%%", shared_battery_r);
             lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelL, "%d%%", shared_battery_l);
             lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelR, "%d%%", shared_battery_r);
             lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelL, "%d%%", shared_battery_l);
             lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelR, "%d%%", shared_battery_r);
             if (shared_battery_l < 25) {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_l < 50) {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
                 
             } else if (shared_battery_l < 75) {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
 
             if (shared_battery_r < 25) {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_r < 50) {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_r < 75) {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else {
-                lv_obj_set_style_text_color(ui_BatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
 
             //------------------------------------RECEIVER CONNECTION LABELS---------------------------------------------
             // Mini status bar does not get text changes so it stays condensed
-            if (receiverConnected) {
-                lv_label_set_text(ui_ConStatusLabel, "ESP-NOW: CONNECTED");
-                lv_obj_set_style_text_color(ui_ConStatusLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+            if (rRecvConnected) {
+                lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nCONNECTED");
+                lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else {
-                lv_label_set_text(ui_ConStatusLabel, "ESP-NOW: DISCONNECTED");
-                lv_obj_set_style_text_color(ui_ConStatusLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nDISCONNECTED");
+                lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                lv_obj_set_style_text_color(ui_DevMiniConStatusLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
 
             //------------------------------------DEVELOPER SCREEN---------------------------------------------

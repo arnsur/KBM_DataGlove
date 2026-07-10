@@ -7,7 +7,7 @@
 #pragma once
 #include "Config.h"
 
-extern volatile bool receiverConnected;
+extern volatile bool rRecvConnected;
 
 /**
  * @brief Initializes ESP-NOW communication, sets up WiFi, and registers the receiver's MAC address.

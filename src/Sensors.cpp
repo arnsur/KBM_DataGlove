@@ -57,47 +57,30 @@ FingerGridPos getFingerRowCol(FingerProfile profile) {
   int rowVal = sensorValues[profile.rowSensor];
   int colVal = -1;
 
+  fingerPos.column = COL_MAIN;
   if (profile.colSensor >= 0) {
     colVal = sensorValues[profile.colSensor];
+    if (colVal > profile.altColVal) {
+      fingerPos.column = COL_ALT;
+    }
   }
 
-  // Guess row based on main column
-  BendZone estimatedRow;
-  if (rowVal >= profile.bottomValMain) {
-    estimatedRow = BOTTOM_ROW;
-  } else if (rowVal >= profile.homeValMain) {
-    estimatedRow = HOME_ROW;
+  if (fingerPos.column == COL_ALT) {
+    if (rowVal > profile.bottomValAlt) {
+      fingerPos.row = BOTTOM_ROW;
+    } else if (rowVal > profile.homeValAlt) {
+      fingerPos.row = HOME_ROW;
+    } else {
+      fingerPos.row = TOP_ROW;
+    }
   } else {
-    estimatedRow = TOP_ROW;
-  }
-  
-  // Fetch alt column threshold based on guessed row
-  int currentAltColThreshold = 9999;
-  if (estimatedRow == BOTTOM_ROW) {
-    currentAltColThreshold = profile.altColValBottom;
-  } else if (estimatedRow == HOME_ROW) {
-    currentAltColThreshold = profile.altColValHome;
-  } else {
-    currentAltColThreshold = profile.altColValTop;
-  }
-
-  // Check if guessed row lines up with the current alt column threshold. If it does not, the guess must be wrong.
-  if (colVal >= 0 && colVal > currentAltColThreshold) {
-    fingerPos.column = COL_ALT;
-  } else {
-    fingerPos.column = COL_MAIN;
-  }
-
-  // Recalculate the row after finding the correct column
-  int bottomRowThreshold = (fingerPos.column == COL_ALT) ? profile.bottomValAlt : profile.bottomValMain;
-  int homeRowThreshold = (fingerPos.column == COL_ALT) ? profile.homeValAlt : profile.homeValMain;
-
-  if (rowVal >= bottomRowThreshold) {
-    fingerPos.row = BOTTOM_ROW;
-  } else if (rowVal >= homeRowThreshold) {
-    fingerPos.row = HOME_ROW;
-  } else {
-    fingerPos.row = TOP_ROW;
+    if (rowVal > profile.bottomValMain) {
+      fingerPos.row = BOTTOM_ROW;
+    } else if (rowVal > profile.homeValMain) {
+      fingerPos.row = HOME_ROW;
+    } else {
+      fingerPos.row = TOP_ROW;
+    }
   }
 
   return fingerPos;

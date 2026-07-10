@@ -81,9 +81,7 @@ struct FingerProfile {
   int homeValAlt; /**< The rotated sensor threshold for the home row */
   
   
-  int altColValTop; /**< The sensor threshold for the alternate column on the top row */
-  int altColValHome; /**< The sensor threshold for the alternate column on the home row */
-  int altColValBottom; /**< The sensor threshold for the alternate column on the bottom row */
+  int altColVal;
 
   int rowSensor; /**< The multiplexer channel for the bend flex sensor */
   int colSensor; /**< The multiplexer channel for the rotation flex sensor, if applicable. Otherwise, default to -1. */

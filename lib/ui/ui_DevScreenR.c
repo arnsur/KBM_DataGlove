@@ -32,7 +32,10 @@ lv_obj_t * ui_IMUYawRollLabelR = NULL;
 lv_obj_t * ui_DevBackButton = NULL;
 lv_obj_t * ui_DevBackButtonText = NULL;
 lv_obj_t * ui_DevMiniStatusBarR = NULL;
-lv_obj_t * ui_DevMiniConStatusLabelR = NULL;
+lv_obj_t * ui_DevConStatusContainerR = NULL;
+lv_obj_t * ui_DevLRecvLabelR = NULL;
+lv_obj_t * ui_DevLRLabelR = NULL;
+lv_obj_t * ui_DevRRecvLabelR = NULL;
 lv_obj_t * ui_DevMiniModeLabelR = NULL;
 lv_obj_t * ui_DevMiniBarBatteryContainerR = NULL;
 lv_obj_t * ui_RDevMiniBatteryLabelL = NULL;
@@ -380,21 +383,55 @@ void ui_DevScreenR_screen_init(void)
     lv_obj_set_style_border_width(ui_DevMiniStatusBarR, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui_DevMiniStatusBarR, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_DevMiniConStatusLabelR = lv_label_create(ui_DevMiniStatusBarR);
-    lv_obj_set_width(ui_DevMiniConStatusLabelR, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_DevMiniConStatusLabelR, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_DevMiniConStatusLabelR, -3);
-    lv_obj_set_y(ui_DevMiniConStatusLabelR, -1);
-    lv_label_set_text(ui_DevMiniConStatusLabelR, "ESP-NOW");
-    lv_obj_set_style_text_color(ui_DevMiniConStatusLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_DevMiniConStatusLabelR, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_DevMiniConStatusLabelR, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_DevMiniConStatusLabelR, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_DevConStatusContainerR = lv_obj_create(ui_DevMiniStatusBarR);
+    lv_obj_remove_style_all(ui_DevConStatusContainerR);
+    lv_obj_set_width(ui_DevConStatusContainerR, 109);
+    lv_obj_set_height(ui_DevConStatusContainerR, 26);
+    lv_obj_set_x(ui_DevConStatusContainerR, -3);
+    lv_obj_set_y(ui_DevConStatusContainerR, 0);
+    lv_obj_set_align(ui_DevConStatusContainerR, LV_ALIGN_LEFT_MID);
+    lv_obj_clear_flag(ui_DevConStatusContainerR, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_DevLRecvLabelR = lv_label_create(ui_DevConStatusContainerR);
+    lv_obj_set_width(ui_DevLRecvLabelR, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_DevLRecvLabelR, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_DevLRecvLabelR, 7);
+    lv_obj_set_y(ui_DevLRecvLabelR, 9);
+    lv_obj_set_align(ui_DevLRecvLabelR, LV_ALIGN_LEFT_MID);
+    lv_label_set_text(ui_DevLRecvLabelR, "L<>RECV");
+    lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_DevLRecvLabelR, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_DevLRecvLabelR, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_DevLRecvLabelR, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_DevLRLabelR = lv_label_create(ui_DevConStatusContainerR);
+    lv_obj_set_width(ui_DevLRLabelR, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_DevLRLabelR, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_DevLRLabelR, 61);
+    lv_obj_set_y(ui_DevLRLabelR, -1);
+    lv_obj_set_align(ui_DevLRLabelR, LV_ALIGN_LEFT_MID);
+    lv_label_set_text(ui_DevLRLabelR, "L<>R");
+    lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_DevLRLabelR, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_DevLRLabelR, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_DevLRLabelR, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_DevRRecvLabelR = lv_label_create(ui_DevConStatusContainerR);
+    lv_obj_set_width(ui_DevRRecvLabelR, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_DevRRecvLabelR, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_DevRRecvLabelR, 7);
+    lv_obj_set_y(ui_DevRRecvLabelR, -7);
+    lv_obj_set_align(ui_DevRRecvLabelR, LV_ALIGN_LEFT_MID);
+    lv_label_set_text(ui_DevRRecvLabelR, "R<>RECV");
+    lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_DevRRecvLabelR, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_DevRRecvLabelR, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_DevRRecvLabelR, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_DevMiniModeLabelR = lv_label_create(ui_DevMiniStatusBarR);
     lv_obj_set_width(ui_DevMiniModeLabelR, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_DevMiniModeLabelR, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_DevMiniModeLabelR, 15);
+    lv_obj_set_x(ui_DevMiniModeLabelR, 28);
     lv_obj_set_y(ui_DevMiniModeLabelR, 0);
     lv_obj_set_align(ui_DevMiniModeLabelR, LV_ALIGN_CENTER);
     lv_label_set_text(ui_DevMiniModeLabelR, "0");
@@ -404,7 +441,7 @@ void ui_DevScreenR_screen_init(void)
     lv_obj_set_style_text_color(ui_DevMiniModeLabelR, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_DevMiniModeLabelR, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_DevMiniModeLabelR, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_DevMiniModeLabelR, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_DevMiniModeLabelR, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_DevMiniBarBatteryContainerR = lv_obj_create(ui_DevMiniStatusBarR);
     lv_obj_remove_style_all(ui_DevMiniBarBatteryContainerR);
@@ -417,12 +454,18 @@ void ui_DevScreenR_screen_init(void)
                       LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
                       LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    ui_object_set_themeable_style_property(ui_DevMiniBarBatteryContainerR, LV_PART_MAIN | LV_STATE_DEFAULT,
+                                           LV_STYLE_BORDER_COLOR, _ui_theme_color_FieldBorder);
+    ui_object_set_themeable_style_property(ui_DevMiniBarBatteryContainerR, LV_PART_MAIN | LV_STATE_DEFAULT,
+                                           LV_STYLE_BORDER_OPA, _ui_theme_alpha_FieldBorder);
+    lv_obj_set_style_border_width(ui_DevMiniBarBatteryContainerR, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_DevMiniBarBatteryContainerR, LV_BORDER_SIDE_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_RDevMiniBatteryLabelL = lv_label_create(ui_DevMiniBarBatteryContainerR);
     lv_obj_set_width(ui_RDevMiniBatteryLabelL, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_RDevMiniBatteryLabelL, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_RDevMiniBatteryLabelL, -30);
-    lv_obj_set_y(ui_RDevMiniBatteryLabelL, -6);
+    lv_obj_set_x(ui_RDevMiniBatteryLabelL, -27);
+    lv_obj_set_y(ui_RDevMiniBatteryLabelL, -5);
     lv_obj_set_align(ui_RDevMiniBatteryLabelL, LV_ALIGN_RIGHT_MID);
     lv_label_set_text(ui_RDevMiniBatteryLabelL, "L:");
     lv_obj_set_style_text_color(ui_RDevMiniBatteryLabelL, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -433,7 +476,7 @@ void ui_DevScreenR_screen_init(void)
     ui_RDevMiniBatteryLevelLabelL = lv_label_create(ui_DevMiniBarBatteryContainerR);
     lv_obj_set_width(ui_RDevMiniBatteryLevelLabelL, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_RDevMiniBatteryLevelLabelL, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_RDevMiniBatteryLevelLabelL, 0);
+    lv_obj_set_x(ui_RDevMiniBatteryLevelLabelL, 1);
     lv_obj_set_y(ui_RDevMiniBatteryLevelLabelL, -6);
     lv_obj_set_align(ui_RDevMiniBatteryLevelLabelL, LV_ALIGN_RIGHT_MID);
     lv_label_set_text(ui_RDevMiniBatteryLevelLabelL, "100%");
@@ -445,7 +488,7 @@ void ui_DevScreenR_screen_init(void)
     ui_RDevMiniBatteryLabelR = lv_label_create(ui_DevMiniBarBatteryContainerR);
     lv_obj_set_width(ui_RDevMiniBatteryLabelR, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_RDevMiniBatteryLabelR, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_RDevMiniBatteryLabelR, -30);
+    lv_obj_set_x(ui_RDevMiniBatteryLabelR, -27);
     lv_obj_set_y(ui_RDevMiniBatteryLabelR, 9);
     lv_obj_set_align(ui_RDevMiniBatteryLabelR, LV_ALIGN_RIGHT_MID);
     lv_label_set_text(ui_RDevMiniBatteryLabelR, "R:");
@@ -457,7 +500,7 @@ void ui_DevScreenR_screen_init(void)
     ui_RDevMiniBatteryLevelLabelR = lv_label_create(ui_DevMiniBarBatteryContainerR);
     lv_obj_set_width(ui_RDevMiniBatteryLevelLabelR, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_RDevMiniBatteryLevelLabelR, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_RDevMiniBatteryLevelLabelR, 0);
+    lv_obj_set_x(ui_RDevMiniBatteryLevelLabelR, 1);
     lv_obj_set_y(ui_RDevMiniBatteryLevelLabelR, 9);
     lv_obj_set_align(ui_RDevMiniBatteryLevelLabelR, LV_ALIGN_RIGHT_MID);
     lv_label_set_text(ui_RDevMiniBatteryLevelLabelR, "100%");
@@ -553,7 +596,10 @@ void ui_DevScreenR_screen_destroy(void)
     ui_DevBackButton = NULL;
     ui_DevBackButtonText = NULL;
     ui_DevMiniStatusBarR = NULL;
-    ui_DevMiniConStatusLabelR = NULL;
+    ui_DevConStatusContainerR = NULL;
+    ui_DevLRecvLabelR = NULL;
+    ui_DevLRLabelR = NULL;
+    ui_DevRRecvLabelR = NULL;
     ui_DevMiniModeLabelR = NULL;
     ui_DevMiniBarBatteryContainerR = NULL;
     ui_RDevMiniBatteryLabelL = NULL;
