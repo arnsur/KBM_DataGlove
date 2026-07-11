@@ -7,7 +7,10 @@
 #pragma once
 #include "Config.h"
 
-extern volatile int rRecvConnStatus;
+extern volatile ConnectionStatus rToRecvConnStatus;
+extern volatile ConnectionStatus lToRConnStatus;
+extern volatile LeftTelemetryMessage leftTelemetryData;
+extern volatile bool newLeftTelemetryAvailable;
 
 /**
  * @brief Initializes ESP-NOW communication, sets up WiFi, and registers the receiver's MAC address.
@@ -19,5 +22,7 @@ void initComms();
  * @brief Sends the current gloveData struct to the receiver using ESP-NOW.
  */
 void sendGloveData();
+
+void queueLeftGloveModeUpdate();
 
 void wakeUpComms();

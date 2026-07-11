@@ -1,4 +1,5 @@
 #include "Motion.h"
+#include "Comms.h"
 #include <Wire.h>
 #include <Sparkfun_BNO08x_Arduino_Library.h>
 
@@ -127,7 +128,9 @@ void updateMotion() {
                             lastInputModeBeforeSwitch = currentInputMode;
                             currentInputMode = 3;
                         }
-                        clutchLongPressHandled = true; 
+                        clutchLongPressHandled = true;
+
+                        queueLeftGloveModeUpdate();
                     }
                 }
 
@@ -136,6 +139,8 @@ void updateMotion() {
                     if (!clutchLongPressHandled && currentInputMode != 3) {
                         currentInputMode = (currentInputMode + 1) % 3;
                         currentMouseMode = 0; // Reset mouse mode if the input mode is cycled
+
+                        queueLeftGloveModeUpdate();
                     }
                 }
             }

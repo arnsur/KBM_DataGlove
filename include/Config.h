@@ -33,41 +33,41 @@ enum ConnectionStatus {CONNECTED, DISCONNECTED, SEARCHING};
  * 
  */
 const char KEY_MAP[4][4][2] = {
-  //--------------------------INDEX--------------------------
-  {
-    //MAIN | ALT
-    { '7', '6'}, // NUM
-    { 'u', 'y'}, // TOP
-    { 'j', 'h'}, // HOME
-    { 'm', 'n'} // BOTTOM
-  },
+    //--------------------------INDEX--------------------------
+    {
+        //MAIN | ALT
+        { '7', '6'}, // NUM
+        { 'u', 'y'}, // TOP
+        { 'j', 'h'}, // HOME
+        { 'm', 'n'} // BOTTOM
+    },
 
-  //-------------------------MIDDLE--------------------------
-  {
-    //MAIN | ALT (NONE)
-    { '8', '\0'}, // NUM
-    { 'i', '\0'}, // TOP
-    { 'k', '\0'}, // HOME
-    { ',', '\0'} // BOTTOM
-  },
+    //-------------------------MIDDLE--------------------------
+    {
+        //MAIN | ALT (NONE)
+        { '8', '\0'}, // NUM
+        { 'i', '\0'}, // TOP
+        { 'k', '\0'}, // HOME
+        { ',', '\0'} // BOTTOM
+    },
 
-  //---------------------------RING--------------------------
-  {
-    //MAIN | ALT (NONE)
-    { '9', '\0'}, // NUM
-    { 'o', '\0'}, // TOP
-    { 'l', '\0'}, // HOME
-    { '.', '\0'} // BOTTOM
-  },
+    //---------------------------RING--------------------------
+    {
+        //MAIN | ALT (NONE)
+        { '9', '\0'}, // NUM
+        { 'o', '\0'}, // TOP
+        { 'l', '\0'}, // HOME
+        { '.', '\0'} // BOTTOM
+    },
 
-  //--------------------------PINKY--------------------------
-  {
-    //MAIN | ALT -- ADD ALT COLUMN AFTER SOLDERING LAST FLEX SENSOR
-    { '0', '\0'}, // NUM
-    { 'p', '\0'}, // TOP
-    { ';', '\0'}, // HOME
-    { '/', '\0'} // BOTTOM
-  }
+    //--------------------------PINKY--------------------------
+    {
+        //MAIN | ALT -- ADD ALT COLUMN AFTER SOLDERING LAST FLEX SENSOR
+        { '0', '\0'}, // NUM
+        { 'p', '\0'}, // TOP
+        { ';', '\0'}, // HOME
+        { '/', '\0'} // BOTTOM
+    }
 };
 
 //----------------------------------STRUCTS-------------------------------------
@@ -76,17 +76,17 @@ const char KEY_MAP[4][4][2] = {
  * 
  */
 struct FingerProfile {
-  int bottomValMain; /**< The non-rotated sensor threshold for the bottom row */
-  int homeValMain; /**< The non-rotated sensor threshold for the home row */
+    int bottomValMain; /**< The non-rotated sensor threshold for the bottom row */
+    int homeValMain; /**< The non-rotated sensor threshold for the home row */
 
-  int bottomValAlt; /**< The rotated sensor threshold for the bottom row */
-  int homeValAlt; /**< The rotated sensor threshold for the home row */
-  
-  
-  int altColVal;
+    int bottomValAlt; /**< The rotated sensor threshold for the bottom row */
+    int homeValAlt; /**< The rotated sensor threshold for the home row */
+    
+    
+    int altColVal;
 
-  int rowSensor; /**< The multiplexer channel for the bend flex sensor */
-  int colSensor; /**< The multiplexer channel for the rotation flex sensor, if applicable. Otherwise, default to -1. */
+    int rowSensor; /**< The multiplexer channel for the bend flex sensor */
+    int colSensor; /**< The multiplexer channel for the rotation flex sensor, if applicable. Otherwise, default to -1. */
 };
 
 /**
@@ -103,17 +103,28 @@ struct FingerGridPos {
  * 
  */
 typedef struct DataMessage {
-  uint8_t hand_id; /**< 0 for left hand, 1 for right hand */
-  int8_t mouseX; /**< Mouse X-axis displacement delta */
-  int8_t mouseY; /**< Mouse Y-axis displacement delta */
-  int8_t scrollTicks; /**< Number of scroll ticks when in mode 1*/
-  bool leftClick; /**< True if the index FSR/primary flex sensor crosses the threshold in mode 0 */
-  bool rightClick; /**< True if the ring FSR/flex sensor crosses the threshold in mode 0 */
-  bool middleClick; /**< True if the middle FSR/flex sensor crosses the threshold in mode 0 */
-  bool mouseFwd;
-  bool mouseBack;
-  char keysPressed[6]; /**< Array of active keystrokes based on KEY_MAP */
+    uint8_t hand_id; /**< 0 for left hand, 1 for right hand */
+    int8_t mouseX; /**< Mouse X-axis displacement delta */
+    int8_t mouseY; /**< Mouse Y-axis displacement delta */
+    int8_t scrollTicks; /**< Number of scroll ticks when in mode 1*/
+    bool leftClick; /**< True if the index FSR/primary flex sensor crosses the threshold in mode 0 */
+    bool rightClick; /**< True if the ring FSR/flex sensor crosses the threshold in mode 0 */
+    bool middleClick; /**< True if the middle FSR/flex sensor crosses the threshold in mode 0 */
+    bool mouseFwd;
+    bool mouseBack;
+    char keysPressed[6]; /**< Array of active keystrokes based on KEY_MAP */
 } DataMessage;
+
+typedef struct ModeUpdateMessage {
+    int currentInputMode;
+} ModeUpdateMessage;
+
+typedef struct LeftTelemetryMessage {
+    int sensorData[11];
+    ConnectionStatus connectionStatus;
+} LeftTelemetryMessage;
+
+extern volatile bool pendingLeftUpdate;
 
 struct PeerConnection {
     const uint8_t* mac;
