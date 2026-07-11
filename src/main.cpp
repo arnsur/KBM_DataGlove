@@ -7,7 +7,7 @@
 #include "Comms.h"
 #include "DisplayUI.h"
 
-volatile int currentInputMode = 0; //0 - M | 1 - UI | 2 - K | 3 - R |
+volatile int currentInputMode = 1; //0 - M | 1 - UI | 2 - K | 3 - R |
 
 FingerProfile indexProfile = {
     .bottomValMain = 2600,
@@ -53,7 +53,7 @@ DataMessage gloveData;
 int batteryLevel = -1;
 float smoothedBatteryRaw = 0.0;
 
-volatile int shared_battery_l = 0;
+volatile int shared_battery_l = 0; // Placeholder until the second glove is made
 volatile int shared_battery_r = 999;
 
 volatile int16_t cursor_x = 160; 

@@ -3,12 +3,3 @@
 // LVGL version: 8.3.11
 // Project name: DataGloveUI
 
-#include "ui.h"
-
-void ui_comp_MainButtonTemplate_create_hook(lv_obj_t * comp)
-{
-}
-
-void ui_comp_MiniStatusBar_create_hook(lv_obj_t * comp)
-{
-}

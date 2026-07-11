@@ -17,6 +17,10 @@ lv_obj_t * ui_SettingsBatteryLabelL = NULL;
 lv_obj_t * ui_SettingsBatteryLevelLabelL = NULL;
 lv_obj_t * ui_SettingsBatteryLabelR = NULL;
 lv_obj_t * ui_SettingsBatteryLevelLabelR = NULL;
+lv_obj_t * ui_InitiateCommsButton = NULL;
+lv_obj_t * ui_BackLabel2 = NULL;
+lv_obj_t * ui_SettingsModePanel = NULL;
+lv_obj_t * ui_SettingsModeLabel = NULL;
 // event funtions
 void ui_event_MainButtonTemplate(lv_event_t * e)
 {
@@ -24,6 +28,15 @@ void ui_event_MainButtonTemplate(lv_event_t * e)
 
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_HomeScreen, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_HomeScreen_screen_init);
+    }
+}
+
+void ui_event_InitiateCommsButton(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        on_comms_search_click(e);
     }
 }
 
@@ -180,7 +193,57 @@ void ui_Settings_screen_init(void)
     lv_obj_set_style_text_align(ui_SettingsBatteryLevelLabelR, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_SettingsBatteryLevelLabelR, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_InitiateCommsButton = lv_btn_create(ui_Settings);
+    lv_obj_set_width(ui_InitiateCommsButton, 111);
+    lv_obj_set_height(ui_InitiateCommsButton, 40);
+    lv_obj_set_align(ui_InitiateCommsButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_InitiateCommsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_InitiateCommsButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_InitiateCommsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_FieldBG);
+    ui_object_set_themeable_style_property(ui_InitiateCommsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_FieldBG);
+    ui_object_set_themeable_style_property(ui_InitiateCommsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_COLOR,
+                                           _ui_theme_color_FieldBorder);
+    ui_object_set_themeable_style_property(ui_InitiateCommsButton, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA,
+                                           _ui_theme_alpha_FieldBorder);
+    lv_obj_set_style_border_width(ui_InitiateCommsButton, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_InitiateCommsButton, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_BackLabel2 = lv_label_create(ui_InitiateCommsButton);
+    lv_obj_set_width(ui_BackLabel2, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_BackLabel2, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_BackLabel2, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_BackLabel2, "Start comms");
+    lv_obj_set_style_text_color(ui_BackLabel2, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_BackLabel2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsModePanel = lv_obj_create(ui_Settings);
+    lv_obj_set_width(ui_SettingsModePanel, 43);
+    lv_obj_set_height(ui_SettingsModePanel, 27);
+    lv_obj_set_x(ui_SettingsModePanel, -4);
+    lv_obj_set_y(ui_SettingsModePanel, 51);
+    lv_obj_set_align(ui_SettingsModePanel, LV_ALIGN_TOP_RIGHT);
+    lv_obj_clear_flag(ui_SettingsModePanel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_object_set_themeable_style_property(ui_SettingsModePanel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_FieldBG);
+    ui_object_set_themeable_style_property(ui_SettingsModePanel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_FieldBG);
+    ui_object_set_themeable_style_property(ui_SettingsModePanel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_COLOR,
+                                           _ui_theme_color_FieldBorder);
+    ui_object_set_themeable_style_property(ui_SettingsModePanel, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA,
+                                           _ui_theme_alpha_FieldBorder);
+    lv_obj_set_style_border_width(ui_SettingsModePanel, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_SettingsModePanel, LV_BORDER_SIDE_FULL, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SettingsModeLabel = lv_label_create(ui_SettingsModePanel);
+    lv_obj_set_width(ui_SettingsModeLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SettingsModeLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_SettingsModeLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_SettingsModeLabel, "0");
+
     lv_obj_add_event_cb(ui_MainButtonTemplate, ui_event_MainButtonTemplate, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_InitiateCommsButton, ui_event_InitiateCommsButton, LV_EVENT_ALL, NULL);
 
 }
 
@@ -201,5 +264,9 @@ void ui_Settings_screen_destroy(void)
     ui_SettingsBatteryLevelLabelL = NULL;
     ui_SettingsBatteryLabelR = NULL;
     ui_SettingsBatteryLevelLabelR = NULL;
+    ui_InitiateCommsButton = NULL;
+    ui_BackLabel2 = NULL;
+    ui_SettingsModePanel = NULL;
+    ui_SettingsModeLabel = NULL;
 
 }

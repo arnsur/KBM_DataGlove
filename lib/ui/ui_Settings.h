@@ -26,6 +26,11 @@ extern lv_obj_t * ui_SettingsBatteryLabelL;
 extern lv_obj_t * ui_SettingsBatteryLevelLabelL;
 extern lv_obj_t * ui_SettingsBatteryLabelR;
 extern lv_obj_t * ui_SettingsBatteryLevelLabelR;
+extern void ui_event_InitiateCommsButton(lv_event_t * e);
+extern lv_obj_t * ui_InitiateCommsButton;
+extern lv_obj_t * ui_BackLabel2;
+extern lv_obj_t * ui_SettingsModePanel;
+extern lv_obj_t * ui_SettingsModeLabel;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

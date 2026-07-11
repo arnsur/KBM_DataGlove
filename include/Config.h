@@ -26,6 +26,8 @@ enum BendZone { NUM_ROW, TOP_ROW, HOME_ROW, BOTTOM_ROW };
  */
 enum RotZone { COL_MAIN, COL_ALT };
 
+enum ConnectionStatus {CONNECTED, DISCONNECTED, SEARCHING};
+
 /**
  * @brief Represents the virtual keyboard layout and the corresponding key mappings for each finger.
  * 
@@ -112,6 +114,13 @@ typedef struct DataMessage {
   bool mouseBack;
   char keysPressed[6]; /**< Array of active keystrokes based on KEY_MAP */
 } DataMessage;
+
+struct PeerConnection {
+    const uint8_t* mac;
+    bool searchStopped;
+    uint32_t firstFailTime;
+};
+
 
 //--------------------------------PINS-----------------------------------
 const int MUX_S0 = 14;

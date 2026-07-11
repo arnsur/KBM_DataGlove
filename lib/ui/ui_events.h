@@ -10,6 +10,8 @@
 extern "C" {
 #endif
 
+void on_comms_search_click(lv_event_t * e);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif
