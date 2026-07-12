@@ -1,6 +1,6 @@
 #include "Sensors.h"
 
-const int NUM_SENSORS = 11;
+const int NUM_SENSORS = 12;
 volatile int sensorValues[NUM_SENSORS];
 
 void initMux() {

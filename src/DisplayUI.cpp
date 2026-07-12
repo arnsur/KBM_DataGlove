@@ -191,15 +191,14 @@ void guiTask(void *pvParameters) {
             lv_bar_set_value(ui_FSR3BarR, sensorValues[3], LV_ANIM_OFF);
             lv_bar_set_value(ui_FSR4BarR, sensorValues[4], LV_ANIM_OFF);
 
-            // Uncomment when all flex sensors are wired and NUM_SENSORS = 12
-            lv_label_set_text_fmt(ui_FlexReadingsLabelR, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)"/*\n%d (%d%%)"*/,
+            lv_label_set_text_fmt(ui_FlexReadingsLabelR, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)",
                 sensorValues[5], 100 *sensorValues[5]/4096,
                 sensorValues[6], 100 *sensorValues[6]/4096,
                 sensorValues[7], 100 *sensorValues[7]/4096,
                 sensorValues[8], 100 *sensorValues[8]/4096,
                 sensorValues[9], 100 *sensorValues[9]/4096,
-                sensorValues[10], 100 *sensorValues[10]/4096);/*,
-                sensorValues[11], 100 *sensorValues[11]/4096);*/
+                sensorValues[10], 100 *sensorValues[10]/4096,
+                sensorValues[11], 100 *sensorValues[11]/4096);
             
             lv_bar_set_value(ui_Flex5BarR, sensorValues[5], LV_ANIM_OFF);
             lv_bar_set_value(ui_Flex6BarR, sensorValues[6], LV_ANIM_OFF);
@@ -207,7 +206,7 @@ void guiTask(void *pvParameters) {
             lv_bar_set_value(ui_Flex8BarR, sensorValues[8], LV_ANIM_OFF);
             lv_bar_set_value(ui_Flex9BarR, sensorValues[9], LV_ANIM_OFF);
             lv_bar_set_value(ui_Flex10BarR, sensorValues[10], LV_ANIM_OFF);
-            // lv_bar_set_value(ui_Flex11Bar, sensorValues[11], LV_ANIM_OFF);
+            lv_bar_set_value(ui_Flex11BarR, sensorValues[11], LV_ANIM_OFF);
 
             lv_label_set_text_fmt(ui_IMUYawRollLabelR, "Yaw: %.2f°\nRoll: %.2f°", smoothedYaw, smoothedRoll);
 
