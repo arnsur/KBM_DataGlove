@@ -1,6 +1,7 @@
 #include "Comms.h"
 #include "Sensors.h"
 #include "Config.h"
+#include "DisplayUI.h"
 #include <WiFi.h>
 #include <esp_now.h>
 #include <esp_wifi.h>
@@ -20,6 +21,7 @@ const uint8_t LEFT_GLOVE_ADDRESS[] = {0xE0, 0x8C, 0xFE, 0xE5, 0xFE, 0x04};
 // Go to SEARCHING mode on startup
 volatile ConnectionStatus rToRecvConnStatus = SEARCHING;
 volatile ConnectionStatus lToRConnStatus = SEARCHING;
+extern volatile ConnectionStatus lToRecvConnStatus;
 const int MAX_SEARCH_TIME_SECONDS = 10;
 
 ModeUpdateMessage leftModeUpdateMsg;
@@ -28,6 +30,7 @@ uint32_t lastLeftSendTime = 0;
 
 volatile LeftTelemetryMessage leftTelemetryData;
 volatile bool newLeftTelemetryAvailable = false;
+volatile uint32_t lastLeftTelemetryRecvTime = 0;
 
 // R<>RECV connection struct
 PeerConnection recvPeer = {RECEIVER_ADDRESS, false, 0};
@@ -62,7 +65,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
             // Start timer on first fail, but keep it in SEARCHING mode
             if (leftPeer.firstFailTime == 0) {
                 leftPeer.firstFailTime = millis();
-                lToRConnStatus = SEARCHING; 
+                lToRConnStatus = SEARCHING;
             }
         }
     }
@@ -73,6 +76,8 @@ void OnDataRecv(const uint8_t* mac_addr, const uint8_t *incomingData, int len) {
         if (len == sizeof(LeftTelemetryMessage)) {
             memcpy((void*) &leftTelemetryData, incomingData, sizeof(LeftTelemetryMessage));
             newLeftTelemetryAvailable = true;
+
+            lastLeftTelemetryRecvTime = millis();
         }
     }
 }
@@ -133,8 +138,10 @@ void sendGloveData() {
 
     if (pendingLeftUpdate || activelySearching) {
         leftInterval = 250; // Fast interval: aggressively sync or search
+        leftModeUpdateMsg.wakeUpComms = true;
     } else if (isConnected) {
         leftInterval = 3000; // Slow interval: heartbeat to detect if it was turned off
+        leftModeUpdateMsg.wakeUpComms = false;
     }
 
     if (leftInterval > 0) {
@@ -219,4 +226,6 @@ void wakeUpComms() {
     lToRConnStatus = SEARCHING;
     
     lastLeftSendTime = 0;
+
+    queueLeftGloveModeUpdate();
 }

@@ -26,7 +26,7 @@ enum BendZone { NUM_ROW, TOP_ROW, HOME_ROW, BOTTOM_ROW };
  */
 enum RotZone { COL_MAIN, COL_ALT };
 
-enum ConnectionStatus {CONNECTED, DISCONNECTED, SEARCHING};
+enum ConnectionStatus {CONNECTED, DISCONNECTED, SEARCHING, UNKNOWN};
 
 /**
  * @brief Represents the virtual keyboard layout and the corresponding key mappings for each finger.
@@ -117,6 +117,7 @@ typedef struct DataMessage {
 
 typedef struct ModeUpdateMessage {
     int currentInputMode;
+    bool wakeUpComms;
 } ModeUpdateMessage;
 
 typedef struct LeftTelemetryMessage {

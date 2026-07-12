@@ -11,6 +11,7 @@ extern volatile ConnectionStatus rToRecvConnStatus;
 extern volatile ConnectionStatus lToRConnStatus;
 extern volatile LeftTelemetryMessage leftTelemetryData;
 extern volatile bool newLeftTelemetryAvailable;
+extern volatile uint32_t lastLeftTelemetryRecvTime;
 
 /**
  * @brief Initializes ESP-NOW communication, sets up WiFi, and registers the receiver's MAC address.

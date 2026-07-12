@@ -12,12 +12,14 @@ extern volatile int currentMouseMode;
 extern volatile int shared_battery_l;
 extern volatile int shared_battery_r;
 extern volatile ConnectionStatus rToRecvConnStatus;
+volatile ConnectionStatus lToRecvConnStatus = UNKNOWN;
 extern volatile int sensorValues[];
 extern volatile int16_t cursor_x;
 extern volatile int16_t cursor_y;
 extern volatile bool lmbClicked;
 extern volatile LeftTelemetryMessage leftTelemetryData;
 extern volatile bool newLeftTelemetryAvailable;
+extern volatile uint32_t lastLeftTelemetryRecvTime;
 
 Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
 const uint16_t SCREEN_WIDTH  = 320;
@@ -96,18 +98,22 @@ void guiTask(void *pvParameters) {
 
             if (shared_battery_r < 25) {
                 lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_r < 50) {
                 lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (shared_battery_r < 75) {
                 lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else {
                 lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
@@ -144,28 +150,28 @@ void guiTask(void *pvParameters) {
             }
 
              if (lToRConnStatus == CONNECTED) {
-                lv_label_set_text(ui_HomeLRConLabel, "L<>R:\nCONNECTED");
+                lv_label_set_text(ui_HomeLRConLabel, "L<-R:\nCONNECTED");
                 lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-                lv_label_set_text(ui_SettingsLRConLabel, "L<>R:\nCONNECTED");
+                lv_label_set_text(ui_SettingsLRConLabel, "L<-R:\nCONNECTED");
                 lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
 
                 lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (lToRConnStatus == DISCONNECTED) {
-                lv_label_set_text(ui_HomeLRConLabel, "L<>R:\nDISCONNECTED");
+                lv_label_set_text(ui_HomeLRConLabel, "L<-R:\nDISCONNECTED");
                 lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-                lv_label_set_text(ui_SettingsLRConLabel, "L<>R:\nDISCONNECTED");
+                lv_label_set_text(ui_SettingsLRConLabel, "L<-R:\nDISCONNECTED");
                 lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
 
                 lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
             } else if (lToRConnStatus == SEARCHING) {
-                lv_label_set_text(ui_HomeLRConLabel, "L<>R:\nSEARCHING");
+                lv_label_set_text(ui_HomeLRConLabel, "L<-R:\nSEARCHING");
                 lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
 
-                lv_label_set_text(ui_SettingsLRConLabel, "L<>R:\nSEARCHING");
+                lv_label_set_text(ui_SettingsLRConLabel, "L<-R:\nSEARCHING");
                 lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
 
                 lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -205,45 +211,57 @@ void guiTask(void *pvParameters) {
 
             lv_label_set_text_fmt(ui_IMUYawRollLabelR, "Yaw: %.2f°\nRoll: %.2f°", smoothedYaw, smoothedRoll);
 
+            if (lastLeftTelemetryRecvTime != 0 && (millis() - lastLeftTelemetryRecvTime > 5000)) {
+                lToRecvConnStatus = UNKNOWN;
+            }
             if (newLeftTelemetryAvailable) {
                 int leftSensorValues[11];
                 memcpy(leftSensorValues, (void*) leftTelemetryData.sensorData, sizeof(leftTelemetryData.sensorData));
-                ConnectionStatus lToRecvConnStatus = leftTelemetryData.connectionStatus;
+                lToRecvConnStatus = leftTelemetryData.connectionStatus;
 
                 lv_label_set_text_fmt(ui_FSRReadingsLabelL, "%d (%d%%)",
                     leftSensorValues[0], 100 * leftSensorValues[0]/4096);
                 lv_bar_set_value(ui_FSR0BarL, leftSensorValues[0], LV_ANIM_OFF);
 
-                if (lToRecvConnStatus == CONNECTED) {
-                    lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nCONNECTED");
-                    lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-                    lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nCONNECTED");
-                    lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-                    lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-                } else if (lToRecvConnStatus == DISCONNECTED) {
-                    lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nDISCONNECTED");
-                    lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-                    lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nDISCONNECTED");
-                    lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-                    lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-                } else if (lToRecvConnStatus == SEARCHING) {
-                    lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nSEARCHING");
-                    lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-                    lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nSEARCHING");
-                    lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-                    lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-                }
-
                 newLeftTelemetryAvailable = false;
+            }
+
+            if (lToRecvConnStatus == CONNECTED) {
+                lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nCONNECTED");
+                lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nCONNECTED");
+                lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+            } else if (lToRecvConnStatus == DISCONNECTED) {
+                lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nDISCONNECTED");
+                lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nDISCONNECTED");
+                lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            } else if (lToRecvConnStatus == SEARCHING) {
+                lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nSEARCHING");
+                lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nSEARCHING");
+                lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+            } else if (lToRecvConnStatus == UNKNOWN) {
+                lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nUNKNOWN");
+                lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nUNKNOWN");
+                lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+                lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
             }
 
             lv_timer_handler();
