@@ -24,6 +24,9 @@ float guiRemainderX = 0.0;
 float guiRemainderY = 0.0;
 float mouseSmoothingAlpha = 0.4;
 
+int lastScrollTime = 0;
+const int MIN_SCROLL_INTERVAL_MS = 25;
+
 volatile int currentMouseMode = 0; // 0 - Clutch, LMB, MMB, RMB, Switch | 1 - Scroll up, MB5, MB4, Scroll down, Switch
 
 bool lastClutchState = false;
@@ -206,8 +209,12 @@ void updateMotion() {
             }
 
             int scrollTicks = 0;
-            if (scrollUp) scrollTicks++;
-            if (scrollDown) scrollTicks--;
+
+            if (millis() - lastScrollTime >= MIN_SCROLL_INTERVAL_MS) {
+                lastScrollTime = millis();
+                if (scrollUp) scrollTicks++;
+                if (scrollDown) scrollTicks--;
+            }
 
             uint8_t currentButtons = 0;
             if (lmbClicked) bitSet(currentButtons, 0);
