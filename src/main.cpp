@@ -10,13 +10,13 @@
 volatile int currentInputMode = 1; //0 - M | 1 - UI | 2 - K | 3 - R |
 
 FingerProfile indexProfile = {
-    .bottomValMain = 2600,
-    .homeValMain = 2430,
+    .bottomValMain = 2580,
+    .homeValMain = 2460,
 
-    .bottomValAlt = 2550,
-    .homeValAlt = 2400,
+    .bottomValAlt = 2575,
+    .homeValAlt = 2445,
 
-    .altColVal = 1400,
+    .altColVal = 5.5,
 
     .rowSensor = 7,
     .colSensor = 6
@@ -24,7 +24,7 @@ FingerProfile indexProfile = {
 
 FingerProfile middleProfile = {
     .bottomValMain = 2530,
-    .homeValMain = 2360,
+    .homeValMain = 2400,
 
     .bottomValAlt = 2530,
     .homeValAlt = 2360,
@@ -45,6 +45,19 @@ FingerProfile ringProfile = {
     .altColVal = 9999,
 
     .rowSensor = 9,
+    .colSensor = -1
+};
+
+FingerProfile pinkyProfile = {
+    .bottomValMain = 2590,
+    .homeValMain = 2400,
+
+    .bottomValAlt = 2610,
+    .homeValAlt = 2455,
+    
+    .altColVal = 9999,
+
+    .rowSensor = 10,
     .colSensor = -1
 };
 

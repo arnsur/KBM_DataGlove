@@ -16,8 +16,8 @@ float mouseSensitivity = 60;
 float guiMouseSensMult = 0.33;
 float lastRoll = 0.0;
 float lastYaw = 0.0;
-volatile float smoothedYaw = 0.0;
-volatile float smoothedRoll = 0.0;
+volatile float smoothedYawDeg = 0.0;
+volatile float smoothedRollDeg = 0.0;
 float remainderX = 0.0;
 float remainderY = 0.0;
 float guiRemainderX = 0.0;
@@ -40,6 +40,8 @@ static uint32_t clutchPressTime = 0;
 static bool clutchLongPressHandled = false;
 const uint32_t LONG_PRESS_DELAY_MS = 550;
 int lastInputModeBeforeSwitch = 0;
+
+volatile float keyboardStartYawDeg;
 
 void initIMU() {
     pinMode(IMU_RST, OUTPUT);
@@ -80,22 +82,22 @@ void updateMotion() {
             yaw = (imu.getYaw()) * 180.0 / PI; // Aligns with physical yaw of the wrist.
 
             if (lastYaw == 0) {
-                smoothedYaw = lastYaw;
+                smoothedYawDeg = lastYaw;
                 lastYaw = yaw;
             }
 
             if (lastRoll == 0) {
-                smoothedRoll = lastRoll;
+                smoothedRollDeg = lastRoll;
                 lastRoll = roll;
             }
 
-            smoothedYaw = (mouseSmoothingAlpha * yaw) + ((1.0 - mouseSmoothingAlpha) * smoothedYaw);
-            smoothedRoll = (mouseSmoothingAlpha * roll) + ((1.0 - mouseSmoothingAlpha) * smoothedRoll);
+            smoothedYawDeg = (mouseSmoothingAlpha * yaw) + ((1.0 - mouseSmoothingAlpha) * smoothedYawDeg);
+            smoothedRollDeg = (mouseSmoothingAlpha * roll) + ((1.0 - mouseSmoothingAlpha) * smoothedRollDeg);
 
-            float yawDisplacement = smoothedYaw - lastYaw;
-            lastYaw = smoothedYaw;
-            float rollDisplacement = smoothedRoll - lastRoll;
-            lastRoll = smoothedRoll;
+            float yawDisplacement = smoothedYawDeg - lastYaw;
+            lastYaw = smoothedYawDeg;
+            float rollDisplacement = smoothedRollDeg - lastRoll;
+            lastRoll = smoothedRollDeg;
 
             float mouseX = -yawDisplacement * mouseSensitivity;
             mouseX += remainderX;
@@ -138,6 +140,9 @@ void updateMotion() {
                 if (!clutchBent && lastClutchState) {
                     if (!clutchLongPressHandled && currentInputMode != 3) {
                         currentInputMode = (currentInputMode + 1) % 3;
+                        if (currentInputMode == 2) {
+                            keyboardStartYawDeg = smoothedYawDeg;
+                        }
                         currentMouseMode = 0; // Reset mouse mode if the input mode is cycled
 
                         queueLeftGloveModeUpdate();
@@ -170,7 +175,7 @@ void updateMotion() {
             bool scrollUp = false;
             bool scrollDown = (currentInputMode <= 1 && currentMouseMode == 1 && (sensorValues[0] > 2100 || sensorValues[5] > 2800));
 
-            if (currentInputMode <= 1 && (sensorValues[1] > 2250 || sensorValues[7] > 2600)) {
+            if (currentInputMode <= 1 && (sensorValues[1] > 2250 || sensorValues[7] > 2700)) {
                 if (currentMouseMode == 0) {
                     lmbClicked = true;
                     mb4Clicked = false;

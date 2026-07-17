@@ -2,6 +2,7 @@
 #include "Sensors.h"
 #include "Config.h"
 #include "DisplayUI.h"
+#include "Motion.h"
 #include <WiFi.h>
 #include <esp_now.h>
 #include <esp_wifi.h>
@@ -12,6 +13,9 @@ extern volatile int sensorValues[];
 extern FingerProfile indexProfile;
 extern FingerProfile middleProfile;
 extern FingerProfile ringProfile;
+extern FingerProfile pinkyProfile;
+extern volatile float keyboardStartYawDeg;
+extern volatile float smoothedYawDeg;
 
 // A0:F2:62:F2:2B:70 -- SuperMini ESP32-S3
 const uint8_t RECEIVER_ADDRESS[] = {0xA0, 0xF2, 0x62, 0xF2, 0x2B, 0x70};
@@ -180,6 +184,10 @@ void sendGloveData() {
                 gloveData.middleClick = false;
                 
                 memset(gloveData.keysPressed, '\0', sizeof(gloveData.keysPressed));
+
+                if (sensorValues[4] > 500) {
+                    gloveData.keysPressed[3] = KEY_MAP[PINKY][getFingerRowCol(pinkyProfile).row][getFingerRowCol(pinkyProfile).column];
+                }
                 
                 if (sensorValues[3] > 500) {
                     gloveData.keysPressed[2] = KEY_MAP[RING][getFingerRowCol(ringProfile).row][getFingerRowCol(ringProfile).column];
@@ -191,6 +199,10 @@ void sendGloveData() {
 
                 if (sensorValues[1] > 500) {
                     gloveData.keysPressed[0] = KEY_MAP[INDEX][getFingerRowCol(indexProfile).row][getFingerRowCol(indexProfile).column];
+                }
+
+                if (sensorValues[0] > 500) {
+                    keyboardStartYawDeg = smoothedYawDeg;
                 }
             } else if (currentInputMode == 0) {
                 memset(gloveData.keysPressed, '\0', sizeof(gloveData.keysPressed));

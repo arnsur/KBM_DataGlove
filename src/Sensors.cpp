@@ -1,4 +1,8 @@
 #include "Sensors.h"
+#include "Motion.h"
+
+extern volatile float smoothedYawDeg;
+extern volatile float keyboardStartYawDeg;
 
 const int NUM_SENSORS = 12;
 volatile int sensorValues[NUM_SENSORS];
@@ -59,8 +63,8 @@ FingerGridPos getFingerRowCol(FingerProfile profile) {
 
   fingerPos.column = COL_MAIN;
   if (profile.colSensor >= 0) {
-    colVal = sensorValues[profile.colSensor];
-    if (colVal > profile.altColVal) {
+    colVal = profile.altColVal;
+    if (smoothedYawDeg - keyboardStartYawDeg >= colVal) {
       fingerPos.column = COL_ALT;
     }
   }

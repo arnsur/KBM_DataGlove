@@ -208,7 +208,7 @@ void guiTask(void *pvParameters) {
             lv_bar_set_value(ui_Flex10BarR, sensorValues[10], LV_ANIM_OFF);
             lv_bar_set_value(ui_Flex11BarR, sensorValues[11], LV_ANIM_OFF);
 
-            lv_label_set_text_fmt(ui_IMUYawRollLabelR, "Yaw: %.2f°\nRoll: %.2f°", smoothedYaw, smoothedRoll);
+            lv_label_set_text_fmt(ui_IMUYawRollLabelR, "Yaw: %.2f°\nRoll: %.2f°", smoothedYawDeg, smoothedRollDeg);
 
             if (lastLeftTelemetryRecvTime != 0 && (millis() - lastLeftTelemetryRecvTime > 5000)) {
                 lToRecvConnStatus = UNKNOWN;
@@ -277,7 +277,7 @@ void initDisplay() {
 
     SPI.begin(TFT_CLK, -1, TFT_DIN, TFT_CS);
     tft.init(240, 320);
-    tft.setRotation(1);
+    tft.setRotation(3);
     tft.fillScreen(ST77XX_BLACK);
 
     lv_init();

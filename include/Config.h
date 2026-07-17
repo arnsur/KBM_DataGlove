@@ -83,7 +83,7 @@ struct FingerProfile {
     int homeValAlt; /**< The rotated sensor threshold for the home row */
     
     
-    int altColVal;
+    float altColVal;
 
     int rowSensor; /**< The multiplexer channel for the bend flex sensor */
     int colSensor; /**< The multiplexer channel for the rotation flex sensor, if applicable. Otherwise, default to -1. */
