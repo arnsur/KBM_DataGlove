@@ -10,11 +10,11 @@
 volatile int currentInputMode = 1; //0 - M | 1 - UI | 2 - K | 3 - R |
 
 FingerProfile indexProfile = {
-    .bottomValMain = 2580,
-    .homeValMain = 2460,
+    .bottomValMain = 2615,
+    .homeValMain = 2455,
 
     .bottomValAlt = 2575,
-    .homeValAlt = 2445,
+    .homeValAlt = 2425,
 
     .altColVal = 5.5,
 
@@ -49,8 +49,8 @@ FingerProfile ringProfile = {
 };
 
 FingerProfile pinkyProfile = {
-    .bottomValMain = 2590,
-    .homeValMain = 2400,
+    .bottomValMain = 2650,
+    .homeValMain = 2500,
 
     .bottomValAlt = 2610,
     .homeValAlt = 2455,

@@ -25,7 +25,7 @@ float guiRemainderY = 0.0;
 float mouseSmoothingAlpha = 0.4;
 
 int lastScrollTime = 0;
-const int MIN_SCROLL_INTERVAL_MS = 25;
+const int MIN_SCROLL_INTERVAL_MS = 50;
 
 volatile int currentMouseMode = 0; // 0 - Clutch, LMB, MMB, RMB, Switch | 1 - Scroll up, MB5, MB4, Scroll down, Switch
 
