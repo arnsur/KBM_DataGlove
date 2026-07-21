@@ -1,0 +1,398 @@
+#include "gesture_engine.hpp"
+#include "gesture_config.hpp"
+#include "esp_timer.h"
+#include <cstring>
+
+using namespace GestureConfig;
+
+namespace GestureEngine
+{
+    // --- Mode State Memory ---
+    static int currentInputMode = 1;          // Tracks 0 (Mouse), 1 (UI), 2 (Key), 3 (Rest)
+    static int currentMouseMode = 0;          // Tracks 0 (Clicks), 1 (Scroll/Side)
+    static int lastInputModeBeforeSwitch = 0; // Remembers mode before long-pressing to Rest
+
+    // --- Clutch & Switch State Memory ---
+    static bool lastClutchState = false;        // Detects the exact moment the clutch is pressed/released
+    static bool clutchLongPressHandled = false; // Prevents cycling modes when releasing a long press
+    static uint32_t clutchPressTime = 0;        // Tracks how long the clutch has been held
+
+    static bool lastSwitchState = false; // Detects the exact moment the switch is pressed/released
+
+    // --- IMU Delta Tracking ---
+    static float lastYaw = 0.0f;
+    static float lastRoll = 0.0f;
+    static float smoothedYawDeg = 0.0f;
+    static float smoothedRollDeg = 0.0f;
+    static float keyboardStartYawDeg = 0.0f; // Anchors the keyboard grid relative to where mode 2 started
+
+    // --- Mouse Math & Smoothing ---
+    static float remainderX = 0.0f; // Stores fractional X movement across loops
+    static float remainderY = 0.0f; // Stores fractional Y movement across loops
+
+    // --- UI Cursor Tracking ---
+    // (If the Gesture Engine is processing mode 1 cursor coordinates before sending them)
+    static float guiRemainderX = 0.0f;
+    static float guiRemainderY = 0.0f;
+    static int16_t cursor_x = 160; // Initial center X
+    static int16_t cursor_y = 120; // Initial center Y
+
+    // --- Click & Scroll Freeze Timers ---
+    static uint8_t previousButtons = 0;      // Bitmask to detect if a click state changed
+    static uint32_t lastStateChangeTime = 0; // Starts the 150ms click-freeze timer
+    static uint32_t lastScrollTime = 0;      // Rate limits the scroll ticks
+
+    static FingerGridPos getFingerRowCol(const FingerProfile &profile, const GloveState &gloveState)
+    {
+        FingerGridPos fingerPos = {TOP_ROW, COL_MAIN};
+
+        int rowVal = gloveState.muxValues[profile.rowSensor];
+        int colVal = -1;
+
+        fingerPos.column = COL_MAIN;
+        if (profile.colSensor >= 0)
+        {
+            colVal = profile.altColVal;
+            if (smoothedYawDeg - keyboardStartYawDeg >= colVal)
+            {
+                fingerPos.column = COL_ALT;
+            }
+        }
+
+        if (fingerPos.column == COL_ALT)
+        {
+            if (rowVal > profile.bottomValAlt)
+            {
+                fingerPos.row = BOTTOM_ROW;
+            }
+            else if (rowVal > profile.homeValAlt)
+            {
+                fingerPos.row = HOME_ROW;
+            }
+            else
+            {
+                fingerPos.row = TOP_ROW;
+            }
+        }
+        else
+        {
+            if (rowVal > profile.bottomValMain)
+            {
+                fingerPos.row = BOTTOM_ROW;
+            }
+            else if (rowVal > profile.homeValMain)
+            {
+                fingerPos.row = HOME_ROW;
+            }
+            else
+            {
+                fingerPos.row = TOP_ROW;
+            }
+        }
+
+        return fingerPos;
+    }
+
+    EngineOutput processData(const GloveState &currentGloveState)
+    {
+        uint32_t currentTimeMillis = esp_timer_get_time() / 1000;
+        EngineOutput out;
+        out.message = {};
+        out.modeChanged = false;
+        out.newInputMode = currentInputMode;
+        out.newMouseMode = currentMouseMode;
+
+        if (lastYaw == 0)
+        {
+            smoothedYawDeg = lastYaw;
+            lastYaw = currentGloveState.yaw;
+        }
+
+        if (lastRoll == 0)
+        {
+            smoothedRollDeg = lastRoll;
+            lastRoll = currentGloveState.roll;
+        }
+
+        smoothedYawDeg = (MOUSE_SMOOTHING_ALPHA * currentGloveState.yaw) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedYawDeg);
+        smoothedRollDeg = (MOUSE_SMOOTHING_ALPHA * currentGloveState.roll) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedRollDeg);
+
+        float yawDisplacement = smoothedYawDeg - lastYaw;
+        lastYaw = smoothedYawDeg;
+        float rollDisplacement = smoothedRollDeg - lastRoll;
+        lastRoll = smoothedRollDeg;
+
+        float mouseX = -yawDisplacement * MOUSE_SENSITIVITY;
+        mouseX += remainderX;
+        float mouseY = rollDisplacement * MOUSE_SENSITIVITY;
+        mouseY += remainderY;
+
+        remainderX = mouseX - (int)mouseX;
+        remainderY = mouseY - (int)mouseY;
+
+        bool clutchBent = false;
+        if (currentGloveState.muxValues[5] >= CLUTCH_START_THRESHOLD)
+        {
+            clutchBent = true;
+        }
+        else if (currentGloveState.muxValues[5] < CLUTCH_EXIT_THRESHOLD)
+        {
+            clutchBent = false;
+        }
+
+        bool clutchActsAsModeSwitch = !(currentInputMode == 0 && currentMouseMode == 1);
+        if (clutchActsAsModeSwitch)
+        {
+            // Detect the exact moment the clutch is bent
+            if (clutchBent && !lastClutchState)
+            {
+                clutchPressTime = currentTimeMillis;
+                clutchLongPressHandled = false;
+            }
+
+            // LONG PRESS: Toggle Rest Mode (Mode 3)
+            if (clutchBent && !clutchLongPressHandled)
+            {
+                if (currentTimeMillis - clutchPressTime > LONG_PRESS_DELAY_MS)
+                {
+                    if (currentInputMode == 3)
+                    {
+                        currentInputMode = lastInputModeBeforeSwitch;
+                    }
+                    else
+                    {
+                        lastInputModeBeforeSwitch = currentInputMode;
+                        currentInputMode = 3;
+                    }
+                    clutchLongPressHandled = true;
+                    out.modeChanged = true;
+                    out.newInputMode = currentInputMode;
+                }
+            }
+
+            // SHORT PRESS: Cycle Active Modes (0 -> 1 -> 2 -> 0)
+            if (!clutchBent && lastClutchState)
+            {
+                if (!clutchLongPressHandled && currentInputMode != 3)
+                {
+                    currentInputMode = (currentInputMode + 1) % 3;
+                    if (currentInputMode == 2)
+                    {
+                        keyboardStartYawDeg = smoothedYawDeg;
+                    }
+                    currentMouseMode = 0; // Reset mouse mode if the input mode is cycled
+                    out.modeChanged = true;
+                    out.newInputMode = currentInputMode;
+                }
+            }
+        }
+        lastClutchState = clutchBent;
+
+        bool switchBent = false;
+        if (currentGloveState.muxValues[10] >= SWITCH_START_THRESHOLD)
+        {
+            switchBent = true;
+        }
+        else if (currentGloveState.muxValues[10] < SWITCH_EXIT_THRESHOLD)
+        {
+            switchBent = false;
+        }
+
+        if (currentInputMode == 0 && switchBent && lastSwitchState == false)
+        {
+            if (currentMouseMode == 0)
+            {
+                currentMouseMode = 1;
+            }
+            else if (currentMouseMode == 1)
+            {
+                currentMouseMode = 0;
+            }
+
+            out.modeChanged = true;
+            out.newMouseMode = currentMouseMode;
+        }
+        lastSwitchState = switchBent;
+
+        bool lmbClicked = false;
+        bool rmbClicked = false;
+        bool mmbClicked = false;
+        bool mb5Clicked = false;
+        bool mb4Clicked = false;
+        bool scrollUp = false;
+        bool scrollDown = (currentInputMode <= 1 && currentMouseMode == 1 && (currentGloveState.muxValues[0] > 2100 || currentGloveState.muxValues[5] > 2800));
+
+        if (currentInputMode <= 1 && (currentGloveState.muxValues[1] > 2250 || currentGloveState.muxValues[7] > 2700))
+        {
+            if (currentMouseMode == 0)
+            {
+                lmbClicked = true;
+                mb4Clicked = false;
+            }
+            else if (currentMouseMode == 1)
+            {
+                lmbClicked = false;
+                mb4Clicked = true;
+            }
+        }
+
+        if (currentInputMode <= 1 && (currentGloveState.muxValues[3] > 2150 || currentGloveState.muxValues[9] > 2600))
+        {
+            if (currentMouseMode == 0)
+            {
+                rmbClicked = true;
+                scrollUp = false;
+            }
+            else if (currentMouseMode == 1)
+            {
+                rmbClicked = false;
+                scrollUp = true;
+            }
+        }
+
+        if (currentInputMode <= 1 && (currentGloveState.muxValues[2] > 2150 || currentGloveState.muxValues[8] > 2600))
+        {
+            if (currentMouseMode == 0)
+            {
+                mmbClicked = true;
+                mb5Clicked = false;
+            }
+            else if (currentMouseMode == 1)
+            {
+                mmbClicked = false;
+                mb5Clicked = true;
+            }
+        }
+
+        int scrollTicks = 0;
+
+        if (currentTimeMillis - lastScrollTime >= MIN_SCROLL_INTERVAL_MS)
+        {
+            lastScrollTime = currentTimeMillis;
+            if (scrollUp)
+                scrollTicks++;
+            if (scrollDown)
+                scrollTicks--;
+        }
+
+        uint8_t currentButtons = 0;
+        if (lmbClicked)
+            currentButtons |= (1 << 0);
+        if (rmbClicked)
+            currentButtons |= (1 << 1);
+        if (mmbClicked)
+            currentButtons |= (1 << 2);
+
+        if (currentButtons != previousButtons)
+        {
+            lastStateChangeTime = currentTimeMillis;
+        }
+        previousButtons = currentButtons;
+
+        if (currentTimeMillis - lastStateChangeTime < CLICK_FREEZE_MS || currentInputMode > 1)
+        {
+            out.message.mouseX = 0;
+            out.message.mouseY = 0;
+        }
+        else
+        {
+            out.message.mouseX = (int8_t)mouseX;
+            out.message.mouseY = (int8_t)mouseY;
+        }
+
+        out.message.leftClick = lmbClicked;
+        out.message.rightClick = rmbClicked;
+        out.message.middleClick = mmbClicked;
+        out.message.scrollTicks = scrollTicks;
+        out.message.mouseFwd = mb5Clicked;
+        out.message.mouseBack = mb4Clicked;
+
+        if (currentInputMode == 1)
+        {
+            float exactGuiX = (mouseX * GUI_MOUSE_SENS_MULT) + guiRemainderX;
+            float exactGuiY = (mouseY * GUI_MOUSE_SENS_MULT) + guiRemainderY;
+
+            cursor_x += (int16_t)exactGuiX;
+            cursor_y += (int16_t)exactGuiY;
+            guiRemainderX = exactGuiX - (int16_t)exactGuiX;
+            guiRemainderY = exactGuiY - (int16_t)exactGuiY;
+        }
+
+        switch (currentInputMode)
+        {
+        case 0: // Mouse mode
+            memset(out.message.keysPressed, '\0', sizeof(out.message.keysPressed));
+            break;
+        case 1: // UI mode
+            out.message.mouseX = 0;
+            out.message.mouseY = 0;
+            out.message.scrollTicks = 0;
+            out.message.leftClick = false;
+            out.message.rightClick = false;
+            out.message.middleClick = false;
+            out.message.mouseFwd = false;
+            out.message.mouseBack = false;
+            memset(out.message.keysPressed, '\0', sizeof(out.message.keysPressed));
+            break;
+
+        case 2: // Keyboard mode
+            out.message.mouseX = 0;
+            out.message.mouseY = 0;
+            out.message.scrollTicks = 0;
+            out.message.leftClick = false;
+            out.message.rightClick = false;
+            out.message.middleClick = false;
+            out.message.mouseFwd = false;
+            out.message.mouseBack = false;
+
+            if (currentGloveState.muxValues[4] > 500) {
+                out.message.keysPressed[3] = KEY_MAP[PINKY][getFingerRowCol(pinkyProfile, currentGloveState).row][getFingerRowCol(pinkyProfile, currentGloveState).column];
+            }
+            
+            if (currentGloveState.muxValues[3] > 500) {
+                out.message.keysPressed[2] = KEY_MAP[RING][getFingerRowCol(ringProfile, currentGloveState).row][getFingerRowCol(ringProfile, currentGloveState).column];
+            }
+
+            if (currentGloveState.muxValues[2] > 500) {
+                out.message.keysPressed[1] = KEY_MAP[MIDDLE][getFingerRowCol(middleProfile, currentGloveState).row][getFingerRowCol(middleProfile, currentGloveState).column];
+            }
+
+            if (currentGloveState.muxValues[1] > 500) {
+                out.message.keysPressed[0] = KEY_MAP[INDEX][getFingerRowCol(indexProfile, currentGloveState).row][getFingerRowCol(indexProfile, currentGloveState).column];
+            }
+
+            if (currentGloveState.muxValues[0] > 500) {
+                keyboardStartYawDeg = smoothedYawDeg;
+            }
+
+            break;
+
+        case 3: // Rest mode
+            out.message.mouseX = 0;
+            out.message.mouseY = 0;
+            out.message.scrollTicks = 0;
+            out.message.leftClick = false;
+            out.message.rightClick = false;
+            out.message.middleClick = false;
+            out.message.mouseFwd = false;
+            out.message.mouseBack = false;
+            memset(out.message.keysPressed, '\0', sizeof(out.message.keysPressed));
+            break;
+        }
+
+        // Clamp to UI screen edges (320x240)
+        if (cursor_x < 0)
+            cursor_x = 0;
+        if (cursor_x > 319)
+            cursor_x = 319;
+        if (cursor_y < 0)
+            cursor_y = 0;
+        if (cursor_y > 239)
+            cursor_y = 239;
+
+        out.uiCursorX = cursor_x;
+        out.uiCursorY = cursor_y;
+
+        return out;
+    }
+}

@@ -1,3 +1,3 @@
-idf_component_register(SRCS "core_logic.cpp"
+idf_component_register(SRCS "gesture_engine.cpp"
                     INCLUDE_DIRS "include"
-                    REQUIRES hal_analog hal_imu)
+                    REQUIRES glove_types hal_analog hal_imu esp_timer)

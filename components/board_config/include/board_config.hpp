@@ -1,3 +1,4 @@
+#pragma once
 #include "hal/adc_types.h"
 
 constexpr int MUX_S0 = 14;
