@@ -162,7 +162,19 @@ namespace HalIMU
         hal.write = sh2_write;
         hal.getTimeUs = sh2_get_time_us;
 
+        sh2_open(&hal, nullptr, nullptr);
+
         sh2_setSensorCallback(imu_callback, &imu_data);
+
+        sh2_SensorConfig_t config = {};
+        config.changeSensitivityEnabled = false;
+        config.wakeupEnabled = false;
+        config.changeSensitivityRelative = false;
+        config.alwaysOnEnabled = false;
+        config.changeSensitivity = 0;
+        config.reportInterval_us = 10000; 
+        config.sensorSpecific = 0;
+        sh2_setSensorConfig(SH2_GAME_ROTATION_VECTOR, &config);
     }
 
     bool get_quaternion(float &x, float &y, float &z, float &real)
