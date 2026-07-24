@@ -1,3 +1,3 @@
 idf_component_register(SRCS "board_config.cpp"
                        INCLUDE_DIRS "include"
-                       REQUIRES hal esp_adc)
+                       REQUIRES esp_driver_gpio esp_adc)

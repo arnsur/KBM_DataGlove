@@ -51,10 +51,10 @@ namespace HalAnalog
 
         for (int i = 0; i < NUM_SENSORS; i++)
         {
-            gpio_set_level((gpio_num_t)MUX_S0, (i >> 0) & 1);
-            gpio_set_level((gpio_num_t)MUX_S1, (i >> 1) & 1);
-            gpio_set_level((gpio_num_t)MUX_S2, (i >> 2) & 1);
-            gpio_set_level((gpio_num_t)MUX_S3, (i >> 3) & 1);
+            gpio_set_level(MUX_S0, (i >> 0) & 1);
+            gpio_set_level(MUX_S1, (i >> 1) & 1);
+            gpio_set_level(MUX_S2, (i >> 2) & 1);
+            gpio_set_level(MUX_S3, (i >> 3) & 1);
 
             esp_rom_delay_us(150);
             int dummyRead;

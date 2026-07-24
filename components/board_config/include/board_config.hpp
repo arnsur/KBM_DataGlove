@@ -1,25 +1,26 @@
 #pragma once
 #include "hal/adc_types.h"
+#include "driver/gpio.h"
 
-constexpr int MUX_S0 = 14;
-constexpr int MUX_S1 = 27;
-constexpr int MUX_S2 = 26;
-constexpr int MUX_S3 = 25;
-constexpr int MUX_SIG = 34;
+constexpr gpio_num_t MUX_S0 = GPIO_NUM_14;
+constexpr gpio_num_t MUX_S1 = GPIO_NUM_27;
+constexpr gpio_num_t MUX_S2 = GPIO_NUM_26;
+constexpr gpio_num_t MUX_S3 = GPIO_NUM_25;
+constexpr gpio_num_t MUX_SIG = GPIO_NUM_34;
 constexpr adc_channel_t MUX_SIG_CHANNEL = ADC_CHANNEL_6;
 
-constexpr int I2C_SDA = 21;
-constexpr int I2C_SCL = 22;
-constexpr int IMU_INT = 4;
-constexpr int IMU_RST = 23;
+constexpr gpio_num_t I2C_SDA = GPIO_NUM_21;
+constexpr gpio_num_t I2C_SCL = GPIO_NUM_22;
+constexpr gpio_num_t IMU_INT = GPIO_NUM_4;
+constexpr gpio_num_t IMU_RST = GPIO_NUM_23;
 constexpr int IMU_ADDRESS = 0x4B;
 
-constexpr int BATTERY_PCT_PIN = 35;
+constexpr gpio_num_t BATTERY_PCT_PIN = GPIO_NUM_35;
 constexpr adc_channel_t BATTERY_PCT_CHANNEL = ADC_CHANNEL_7;
 
-constexpr int TFT_DIN = 32;
-constexpr int TFT_CLK = 18;
-constexpr int TFT_CS = 19;
-constexpr int TFT_DC = 33;
-constexpr int TFT_RST = 16;
-constexpr int TFT_BL = 17;
+constexpr gpio_num_t TFT_DIN = GPIO_NUM_32;
+constexpr gpio_num_t TFT_CLK = GPIO_NUM_18;
+constexpr gpio_num_t TFT_CS = GPIO_NUM_19;
+constexpr gpio_num_t TFT_DC = GPIO_NUM_33;
+constexpr gpio_num_t TFT_RST = GPIO_NUM_16;
+constexpr gpio_num_t TFT_BL = GPIO_NUM_17;
