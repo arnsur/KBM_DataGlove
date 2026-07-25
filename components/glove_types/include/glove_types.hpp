@@ -26,8 +26,10 @@ enum ConnectionStatus
 
 struct GloveState
 {
-    float yaw;
-    float roll;
+    float quatReal;
+    float quatX;
+    float quatY;
+    float quatZ;
     std::array<int, 12> muxValues;
 };
 

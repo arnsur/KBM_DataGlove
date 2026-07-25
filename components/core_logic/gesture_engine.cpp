@@ -2,6 +2,7 @@
 #include "gesture_config.hpp"
 #include "esp_timer.h"
 #include <cstring>
+#include <cmath>
 
 using namespace GestureConfig;
 
@@ -96,6 +97,28 @@ namespace GestureEngine
     EngineOutput processData(const GloveState &currentGloveState)
     {
         uint32_t currentTimeMillis = esp_timer_get_time() / 1000;
+
+        // ------------ CONVERT QUAT TO YAW-PITCH-ROLL EULER ------------
+        float w = currentGloveState.quatReal;
+        float x = currentGloveState.quatX;
+        float y = currentGloveState.quatY;
+        float z = currentGloveState.quatZ;
+
+        // Yaw
+        float siny_cosp = 2.0f * (w * z + x * y);
+        float cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
+        float currentYawDeg = std::atan2(siny_cosp, cosy_cosp) * (180.0f / M_PI);
+
+        // Pitch calculations if needed in the future
+        // float sinp = std::sqrt(1.0f + 2.0f * (w * y - x * z));
+        // float cosp = std::sqrt(1.0f - 2.0f * (w * y - x * z));
+        // float currentPitchDeg = (2.0f * std::atan2(sinp, cosp) - M_PI / 2.0f) * (180.0f / M_PI);
+
+        // Roll
+        float sinr_cosp = 2.0f * (w * x + y * z);
+        float cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
+        float currentRollDeg = std::atan2(sinr_cosp, cosr_cosp) * (180.0f / M_PI);
+
         EngineOutput out;
         out.message = {};
         out.modeChanged = false;
@@ -105,17 +128,17 @@ namespace GestureEngine
         if (lastYaw == 0)
         {
             smoothedYawDeg = lastYaw;
-            lastYaw = currentGloveState.yaw;
+            lastYaw = currentYawDeg;
         }
 
         if (lastRoll == 0)
         {
             smoothedRollDeg = lastRoll;
-            lastRoll = currentGloveState.roll;
+            lastRoll = currentRollDeg;
         }
 
-        smoothedYawDeg = (MOUSE_SMOOTHING_ALPHA * currentGloveState.yaw) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedYawDeg);
-        smoothedRollDeg = (MOUSE_SMOOTHING_ALPHA * currentGloveState.roll) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedRollDeg);
+        smoothedYawDeg = (MOUSE_SMOOTHING_ALPHA * currentYawDeg) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedYawDeg);
+        smoothedRollDeg = (MOUSE_SMOOTHING_ALPHA * currentRollDeg) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedRollDeg);
 
         float yawDisplacement = smoothedYawDeg - lastYaw;
         lastYaw = smoothedYawDeg;
