@@ -1,1 +1,9 @@
-void func(void);
+#pragma once
+#include "glove_types.hpp"
+
+namespace Comms
+{
+    void init();
+
+    void vCommsTask(void *pvParameters);
+}

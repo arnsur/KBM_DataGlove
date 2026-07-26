@@ -121,6 +121,7 @@ namespace GestureEngine
 
         EngineOutput out;
         out.message = {};
+        out.message.hand_id = 1;
         out.modeChanged = false;
         out.newInputMode = currentInputMode;
         out.newMouseMode = currentMouseMode;

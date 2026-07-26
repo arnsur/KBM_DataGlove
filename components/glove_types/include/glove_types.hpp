@@ -36,10 +36,10 @@ struct GloveState
 struct EngineOutput
 {
     DataMessage message;
+
     bool modeChanged;
     int newInputMode;
     int newMouseMode;
-
     int16_t uiCursorX;
     int16_t uiCursorY;
 };
