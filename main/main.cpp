@@ -17,8 +17,12 @@ extern "C"
 #include "hal_imu.hpp"
 #include "gesture_engine.hpp"
 #include "comms_espnow.hpp"
+#include "hal_display.hpp"
 
 QueueHandle_t commsQueue = NULL;
+
+std::mutex uiMutex;
+UIState uiState;
 
 void vSensorTask(void *pvParameters)
 {
@@ -46,6 +50,24 @@ void vSensorTask(void *pvParameters)
         }
 
         EngineOutput output = GestureEngine::processData(currentState);
+        int batteryMilliVolts = HalAnalog::readBatteryMilliVolts();
+        // TODO: add low battery mV shutdown
+
+        {
+            std::lock_guard<std::mutex> lock(uiMutex);
+
+            uiState.inputMode = output.newInputMode;
+            uiState.mouseMode = output.newMouseMode;
+            uiState.uiCursorX = output.uiCursorX;
+            uiState.uiCursorY = output.uiCursorY;
+            uiState.batteryMilliVolts = batteryMilliVolts;
+            uiState.hasClicked = output.uiClick;
+
+            for (int i = 0; i < 12; i++)
+            {
+                uiState.muxValues[i] = currentState.muxValues[i];
+            }
+        }
 
         xQueueSend(commsQueue, &output.message, 0);
 
@@ -53,6 +75,25 @@ void vSensorTask(void *pvParameters)
     }
 
     vTaskDelete(NULL);
+}
+
+void vUITask(void *pvParameters)
+{
+    HalDisplay::init();
+
+    UIState localUIState = {};
+
+    while (1)
+    {
+        {
+            std::lock_guard<std::mutex> lock(uiMutex);
+            localUIState = uiState;
+        }
+
+        HalDisplay::update_display(localUIState);
+
+        vTaskDelay(pdMS_TO_TICKS(33));
+    }
 }
 
 extern "C" void app_main(void)
@@ -68,6 +109,15 @@ extern "C" void app_main(void)
         4096,
         NULL,
         4,
+        NULL,
+        0);
+
+    xTaskCreatePinnedToCore(
+        vUITask,
+        "UITask",
+        8192,
+        NULL,
+        1,
         NULL,
         0);
 

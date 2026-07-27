@@ -125,6 +125,7 @@ namespace GestureEngine
         out.modeChanged = false;
         out.newInputMode = currentInputMode;
         out.newMouseMode = currentMouseMode;
+        out.uiClick = false;
 
         if (lastYaw == 0)
         {
@@ -340,6 +341,8 @@ namespace GestureEngine
             cursor_y += (int16_t)exactGuiY;
             guiRemainderX = exactGuiX - (int16_t)exactGuiX;
             guiRemainderY = exactGuiY - (int16_t)exactGuiY;
+
+            out.uiClick = lmbClicked;
         }
 
         switch (currentInputMode)

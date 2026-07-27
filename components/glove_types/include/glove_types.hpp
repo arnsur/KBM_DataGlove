@@ -33,6 +33,18 @@ struct GloveState
     std::array<int, 12> muxValues;
 };
 
+struct UIState
+{
+    bool modeChanged;
+    int inputMode;
+    int mouseMode;
+    bool hasClicked;
+    int16_t uiCursorX;
+    int16_t uiCursorY;
+    int batteryMilliVolts;
+    std::array<int, 12> muxValues;
+};
+
 struct EngineOutput
 {
     DataMessage message;
@@ -40,6 +52,7 @@ struct EngineOutput
     bool modeChanged;
     int newInputMode;
     int newMouseMode;
+    bool uiClick;
     int16_t uiCursorX;
     int16_t uiCursorY;
 };
