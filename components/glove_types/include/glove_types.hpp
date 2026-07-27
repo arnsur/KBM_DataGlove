@@ -31,6 +31,7 @@ struct GloveState
     float quatY;
     float quatZ;
     std::array<int, 12> muxValues;
+    int batteryDividerMilliVolts;
 };
 
 struct UIState
@@ -41,7 +42,7 @@ struct UIState
     bool hasClicked;
     int16_t uiCursorX;
     int16_t uiCursorY;
-    int batteryMilliVolts;
+    int batteryPct;
     std::array<int, 12> muxValues;
 };
 
@@ -55,4 +56,5 @@ struct EngineOutput
     bool uiClick;
     int16_t uiCursorX;
     int16_t uiCursorY;
+    int batteryPct;
 };

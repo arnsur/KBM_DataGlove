@@ -12,5 +12,5 @@ namespace HalAnalog
 
     SensorArray getSensorValues();
 
-    int readBatteryMilliVolts();
+    int readBatteryDividerMilliVolts();
 }

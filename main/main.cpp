@@ -34,6 +34,7 @@ void vSensorTask(void *pvParameters)
     while (1)
     {
         currentState.muxValues = HalAnalog::getSensorValues();
+        currentState.batteryDividerMilliVolts = HalAnalog::readBatteryDividerMilliVolts();
 
         if (HalIMU::is_data_ready())
         {
@@ -50,7 +51,6 @@ void vSensorTask(void *pvParameters)
         }
 
         EngineOutput output = GestureEngine::processData(currentState);
-        int batteryMilliVolts = HalAnalog::readBatteryMilliVolts();
         // TODO: add low battery mV shutdown
 
         {
@@ -60,7 +60,7 @@ void vSensorTask(void *pvParameters)
             uiState.mouseMode = output.newMouseMode;
             uiState.uiCursorX = output.uiCursorX;
             uiState.uiCursorY = output.uiCursorY;
-            uiState.batteryMilliVolts = batteryMilliVolts;
+            uiState.batteryPct = output.batteryPct;
             uiState.hasClicked = output.uiClick;
 
             for (int i = 0; i < 12; i++)

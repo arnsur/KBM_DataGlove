@@ -98,7 +98,7 @@ namespace HalAnalog
         return sensorValues;
     }
 
-    int readBatteryMilliVolts()
+    int readBatteryDividerMilliVolts()
     {
         int dummy_read;
         adc_oneshot_read(adc1_handle, BATTERY_PCT_CHANNEL, &dummy_read);

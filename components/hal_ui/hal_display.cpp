@@ -1,7 +1,7 @@
 #include "hal_display.hpp"
 #include "board_config.hpp"
 #include "driver/spi_master.h"
-#include "driver/gpio.h"
+#include "driver/ledc.h"
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
@@ -61,17 +61,17 @@ namespace HalDisplay
 
         esp_lcd_panel_io_handle_t io_handle = NULL;
         esp_lcd_panel_io_spi_config_t lcd_io_config = {};
-        lcd_io_config.dc_gpio_num = TFT_DC;
         lcd_io_config.cs_gpio_num = TFT_CS;
+        lcd_io_config.dc_gpio_num = TFT_DC;
         lcd_io_config.spi_mode = 0;
-        lcd_io_config.pclk_hz = 26 * 1000 * 1000; // 26 MHz because of pin matrix
-        lcd_io_config.trans_queue_depth = 10;
+        lcd_io_config.pclk_hz = 26 * 1000 * 1000;// 26 MHz because of pin matrix
+        lcd_io_config.trans_queue_depth = 10,
+        lcd_io_config.on_color_trans_done = on_color_trans_done;
+        lcd_io_config.user_ctx = &disp_drv;
         lcd_io_config.lcd_cmd_bits = 8;
         lcd_io_config.lcd_param_bits = 8;
         lcd_io_config.cs_ena_pretrans = 0;
         lcd_io_config.cs_ena_posttrans = 0;
-        lcd_io_config.on_color_trans_done = on_color_trans_done;
-        lcd_io_config.user_ctx = &disp_drv;
         ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST, &lcd_io_config, &io_handle));
 
         esp_lcd_panel_dev_config_t panel_config = {};
@@ -90,8 +90,24 @@ namespace HalDisplay
         esp_lcd_panel_swap_xy(panel_handle, true);
         esp_lcd_panel_mirror(panel_handle, true, false);
 
-        gpio_set_direction(TFT_BL, GPIO_MODE_OUTPUT);
-        gpio_set_level(TFT_BL, 1);
+
+        ledc_timer_config_t disp_bltimer_config = {};
+        disp_bltimer_config.speed_mode = LEDC_LOW_SPEED_MODE;
+        disp_bltimer_config.timer_num = LEDC_TIMER_0;
+        disp_bltimer_config.freq_hz = 5000;
+        disp_bltimer_config.duty_resolution = LEDC_TIMER_12_BIT;
+        disp_bltimer_config.clk_cfg = LEDC_AUTO_CLK;
+        ESP_ERROR_CHECK(ledc_timer_config(&disp_bltimer_config));
+
+        ledc_channel_config_t disp_bl_channel_config = {};
+        disp_bl_channel_config.gpio_num = TFT_BL;
+        disp_bl_channel_config.speed_mode = LEDC_LOW_SPEED_MODE;
+        disp_bl_channel_config.channel = LEDC_CHANNEL_0;
+        disp_bl_channel_config.timer_sel = LEDC_TIMER_0;
+        ESP_ERROR_CHECK(ledc_channel_config(&disp_bl_channel_config));
+
+        ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 2048)); // 0 - 4096
+        ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0));
 
         lv_init();
         lv_disp_draw_buf_init(&disp_buf, buf, NULL, SCREEN_WIDTH * 20);
@@ -144,34 +160,33 @@ namespace HalDisplay
         }
 
         //------------------------------------BATTERY LABELS---------------------------------------------
-        // Placeholders
-        int shared_battery_l = -1;
-        int shared_battery_r = -1;
+        int battery_r = currentUIState.batteryPct;
+        int battery_l = 33; // Placeholder
 
-        lv_label_set_text_fmt(ui_HomeBatteryLevelLabelL, "%d%%", shared_battery_l);
-        lv_label_set_text_fmt(ui_HomeBatteryLevelLabelR, "%d%%", shared_battery_r);
+        lv_label_set_text_fmt(ui_HomeBatteryLevelLabelL, "%d%%", battery_l);
+        lv_label_set_text_fmt(ui_HomeBatteryLevelLabelR, "%d%%", battery_r);
 
-        lv_label_set_text_fmt(ui_SettingsBatteryLevelLabelL, "%d%%", shared_battery_l);
-        lv_label_set_text_fmt(ui_SettingsBatteryLevelLabelR, "%d%%", shared_battery_r);
+        lv_label_set_text_fmt(ui_SettingsBatteryLevelLabelL, "%d%%", battery_l);
+        lv_label_set_text_fmt(ui_SettingsBatteryLevelLabelR, "%d%%", battery_r);
 
-        lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelL, "%d%%", shared_battery_l);
-        lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelR, "%d%%", shared_battery_r);
+        lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelL, "%d%%", battery_l);
+        lv_label_set_text_fmt(ui_RDevMiniBatteryLevelLabelR, "%d%%", battery_r);
 
-        lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelL, "%d%%", shared_battery_l);
-        lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelR, "%d%%", shared_battery_r);
+        lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelL, "%d%%", battery_l);
+        lv_label_set_text_fmt(ui_LDevMiniBatteryLevelLabelR, "%d%%", battery_r);
 
-        if (shared_battery_l < 25) {
+        if (battery_l < 25) {
             lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN);
-        } else if (shared_battery_l < 50) {
+        } else if (battery_l < 50) {
             lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0xE88300), LV_PART_MAIN);
             
-        } else if (shared_battery_l < 75) {
+        } else if (battery_l < 75) {
             lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelL, lv_color_hex(0xE7D02D), LV_PART_MAIN);
@@ -183,17 +198,17 @@ namespace HalDisplay
             lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN);
         }
 
-        if (shared_battery_r < 25) {
+        if (battery_r < 25) {
             lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN);
-        } else if (shared_battery_r < 50) {
+        } else if (battery_r < 50) {
             lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_LDevMiniBatteryLevelLabelR, lv_color_hex(0xE88300), LV_PART_MAIN);
-        } else if (shared_battery_r < 75) {
+        } else if (battery_r < 75) {
             lv_obj_set_style_text_color(ui_HomeBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_SettingsBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN);
             lv_obj_set_style_text_color(ui_RDevMiniBatteryLevelLabelR, lv_color_hex(0xE7D02D), LV_PART_MAIN);

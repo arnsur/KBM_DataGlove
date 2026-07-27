@@ -43,6 +43,12 @@ namespace GestureEngine
     static uint32_t lastStateChangeTime = 0; // Starts the 150ms click-freeze timer
     static uint32_t lastScrollTime = 0;      // Rate limits the scroll ticks
 
+    // --- Battery Constants ---
+    constexpr int BATTERY_MILLIVOLTS_DIVIDER_MAX = 2020;
+    constexpr int BATTERY_MILLIVOLTS_DIVIDER_MIN = 1600;
+    constexpr float BATTERY_SMOOTHING_ALPHA = 0.05;
+    float batterySmoothedMilliVolts = 0;
+
     static FingerGridPos getFingerRowCol(const FingerProfile &profile, const GloveState &gloveState)
     {
         FingerGridPos fingerPos = {TOP_ROW, COL_MAIN};
@@ -126,6 +132,13 @@ namespace GestureEngine
         out.newInputMode = currentInputMode;
         out.newMouseMode = currentMouseMode;
         out.uiClick = false;
+
+        int batteryDividerMilliVoltsRaw = currentGloveState.batteryDividerMilliVolts;
+        if (batterySmoothedMilliVolts == 0) batterySmoothedMilliVolts = batteryDividerMilliVoltsRaw; 
+        batterySmoothedMilliVolts = (BATTERY_SMOOTHING_ALPHA * batteryDividerMilliVoltsRaw) + ((1 - BATTERY_SMOOTHING_ALPHA) * batterySmoothedMilliVolts);
+
+        // pct = (v-LOW)/(HIGH - LOW)
+        out.batteryPct = (int)(100.0f * (((float)(batterySmoothedMilliVolts - BATTERY_MILLIVOLTS_DIVIDER_MIN))/(BATTERY_MILLIVOLTS_DIVIDER_MAX - BATTERY_MILLIVOLTS_DIVIDER_MIN)));
 
         if (lastYaw == 0)
         {
