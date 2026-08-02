@@ -108,7 +108,6 @@ namespace HalIMU
 
         esp_rom_delay_us(200);
 
-        // Read the entire packet in ONE single continuous I2C transaction
         unsigned read_len = (len < 256) ? len : 256;
 
         esp_err_t err = i2c_master_receive(imu_handle, pBuffer, read_len, pdMS_TO_TICKS(200));
@@ -172,6 +171,7 @@ namespace HalIMU
         gpio_set_level(IMU_RST, 1);
         vTaskDelay(pdMS_TO_TICKS(500));
 
+        // I2C master bus config
         i2c_master_bus_config_t i2c_config = {};
         i2c_config.i2c_port = I2C_NUM_0;
         i2c_config.sda_io_num = I2C_SDA;
@@ -184,6 +184,7 @@ namespace HalIMU
         ESP_ERROR_CHECK(i2c_master_bus_reset(bus_handle));
         vTaskDelay(pdMS_TO_TICKS(10));
 
+        // I2C device config
         i2c_device_config_t device_config = {};
         device_config.dev_addr_length = I2C_ADDR_BIT_LEN_7;
         device_config.device_address = IMU_ADDRESS;
@@ -201,6 +202,7 @@ namespace HalIMU
 
         ESP_ERROR_CHECK(gpio_isr_handler_add(IMU_INT, imu_isr_handler, nullptr));
 
+        // Set SH2 callbacks
         hal.open = hal_sh2_open;
         hal.close = hal_sh2_close;
         hal.read = hal_sh2_read;
