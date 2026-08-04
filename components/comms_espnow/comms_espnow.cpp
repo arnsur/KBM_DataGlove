@@ -21,8 +21,6 @@ EventBits_t shutdown_bits;
 
 namespace Comms
 {
-    // A0:F2:62:F2:2B:70 -- SuperMini ESP32-S3
-    constexpr static uint8_t RECEIVER_ADDRESS[] = {0xA0, 0xF2, 0x62, 0xF2, 0x2B, 0x70};
     std::atomic<bool> finalMessageSent{false};
 
     void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
@@ -79,13 +77,13 @@ namespace Comms
 
     void vCommsTask(void *pvParameters)
     {
-        DataMessage outgoingMessage;
+        CommsMessage outgoingMessage;
 
         while (1)
         {
             if (xQueueReceive(commsQueue, &outgoingMessage, portMAX_DELAY) == pdTRUE)
             {
-                esp_now_send(RECEIVER_ADDRESS, (uint8_t *)&outgoingMessage, sizeof(DataMessage));
+                esp_now_send(outgoingMessage.address, (uint8_t *)&outgoingMessage.payload, outgoingMessage.payload_length);
             }
         }
     }
@@ -93,10 +91,10 @@ namespace Comms
     void sleep()
     {
         printf("Comms::sleep: preparing final shutdown message\n");
-        DataMessage final_message;
-        
+        ReceiverMessage final_message;
+
         final_message.hand_id = 1;
-        
+
         final_message.mouseX = 0;
         final_message.mouseY = 0;
         final_message.scrollTicks = 0;
@@ -111,7 +109,7 @@ namespace Comms
 
         finalMessageSent.store(true, std::memory_order_release);
 
-        esp_err_t err = esp_now_send(RECEIVER_ADDRESS, (uint8_t *)&final_message, sizeof(DataMessage));
+        esp_err_t err = esp_now_send(RECEIVER_ADDRESS, (uint8_t *)&final_message, sizeof(ReceiverMessage));
         printf("Comms::sleep: esp_now_send returned %d\n", err);
 
         if (err == ESP_OK && final_msg_event != NULL)
@@ -122,8 +120,7 @@ namespace Comms
                 SHUTDOWN_READY,
                 pdTRUE,
                 pdTRUE,
-                pdMS_TO_TICKS(200)
-            );
+                pdMS_TO_TICKS(200));
 
             if ((shutdown_bits & FINAL_MESSAGE_RECEIVED) != 0)
             {

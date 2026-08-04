@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <array>
 
-typedef struct DataMessage
+typedef struct ReceiverMessage
 {
     uint8_t hand_id;
     int8_t mouseX;
@@ -14,7 +14,25 @@ typedef struct DataMessage
     bool mouseFwd;
     bool mouseBack;
     char keysPressed[6];
-} DataMessage;
+} ReceiverMessage;
+
+typedef struct ModeUpdateMessage
+{
+    int currentInputMode;
+    bool wakeUpComms;
+} ModeUpdateMessage;
+
+typedef struct CommsMessage
+{
+    uint8_t address[6];
+    size_t payload_length;
+
+    union
+    {
+        ReceiverMessage receiver_message;
+        ModeUpdateMessage mode_update_message;
+    } payload;
+} CommsMessage;
 
 typedef struct PowerManagerMessage
 {
@@ -53,7 +71,7 @@ struct UIState
 
 struct EngineOutput
 {
-    DataMessage message;
+    ReceiverMessage message;
 
     bool modeChanged;
     int newInputMode;

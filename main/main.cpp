@@ -5,6 +5,7 @@
 #include "freertos/task.h"
 #include <mutex>
 #include "esp_sleep.h"
+#include <cstring>
 
 extern "C"
 {
@@ -124,7 +125,13 @@ void vSensorTask(void *pvParameters)
             }
         }
 
-        xQueueSend(commsQueue, &output.message, 0);
+        CommsMessage comms_message = {};
+        memcpy(comms_message.address, Comms::RECEIVER_ADDRESS, 6);
+        comms_message.payload_length = sizeof(ReceiverMessage);
+
+        comms_message.payload.receiver_message = output.message;
+
+        xQueueSend(commsQueue, &comms_message, 0);
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -155,7 +162,7 @@ extern "C" void app_main(void)
 {
     ESP_ERROR_CHECK(gpio_install_isr_service(0));
 
-    commsQueue = xQueueCreate(10, sizeof(DataMessage));
+    commsQueue = xQueueCreate(10, sizeof(CommsMessage));
     power_manager_queue = xQueueCreate(10, sizeof(PowerManagerMessage));
 
     Comms::init();

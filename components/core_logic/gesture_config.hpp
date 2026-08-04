@@ -123,8 +123,8 @@ namespace GestureConfig
     constexpr float MOUSE_SMOOTHING_ALPHA = 0.4f;
 
     // --- Flex Sensor Thresholds ---
-    constexpr int CLUTCH_START_THRESHOLD = 3000;
-    constexpr int CLUTCH_EXIT_THRESHOLD = 2850;
+    constexpr int CLUTCH_START_THRESHOLD = 2900;
+    constexpr int CLUTCH_EXIT_THRESHOLD = 2800;
 
     constexpr int SWITCH_START_THRESHOLD = 2650;
     constexpr int SWITCH_EXIT_THRESHOLD = 2500;
