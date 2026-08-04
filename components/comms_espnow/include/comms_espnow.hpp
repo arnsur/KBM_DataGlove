@@ -6,4 +6,6 @@ namespace Comms
     void init();
 
     void vCommsTask(void *pvParameters);
+
+    void sleep();
 }

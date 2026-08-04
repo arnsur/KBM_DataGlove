@@ -6,4 +6,6 @@ namespace HalDisplay
     void init();
     
     void update_display(UIState &currentUIState);
+
+    void sleep();
 }

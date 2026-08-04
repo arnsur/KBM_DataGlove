@@ -4,6 +4,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <mutex>
+#include "esp_sleep.h"
 
 extern "C"
 {
@@ -19,10 +20,50 @@ extern "C"
 #include "comms_espnow.hpp"
 #include "hal_display.hpp"
 
+TaskHandle_t comms_task_handle = NULL;
+TaskHandle_t ui_task_handle = NULL;
+
 QueueHandle_t commsQueue = NULL;
+QueueHandle_t power_manager_queue = NULL;
 
 std::mutex uiMutex;
 UIState uiState;
+
+void low_battery_shutdown()
+{
+    printf("Shutdown: suspending UI and comms tasks\n");
+    vTaskSuspend(ui_task_handle);
+    vTaskSuspend(comms_task_handle);
+    
+    printf("Shutdown: comms sleep\n");
+    Comms::sleep();
+
+    printf("Shutdown: IMU sleep\n");
+    HalIMU::sleep();
+
+    printf("Shutdown: display sleep\n");
+    HalDisplay::sleep();
+
+    printf("Shutdown: entering deep sleep\n");
+    esp_deep_sleep_start();
+}
+
+void vPowerManagerTask(void *pvParameters)
+{
+    PowerManagerMessage message;
+
+    while(1)
+    {
+        if (xQueueReceive(power_manager_queue, &message, portMAX_DELAY) == pdTRUE)
+        {
+            if (message.shutdown_requested)
+            {
+                printf("PowerManagerTask: received shutdown request\n");
+                low_battery_shutdown();
+            }
+        }
+    }
+}
 
 void vSensorTask(void *pvParameters)
 {
@@ -51,7 +92,21 @@ void vSensorTask(void *pvParameters)
         }
 
         EngineOutput output = GestureEngine::processData(currentState);
-        // TODO: add low battery mV shutdown
+
+        // Prevent the glove from shutting down when plugged in to upload code.
+        // If the battery level appears to be below 2V, which the mV reading can seem to be at when plugged in,
+        // the battery cannot be connected and must be plugged in with a cable as this is an impossible voltage for a 3.7V LiPo battery to discharge to.
+        if (output.batteryPct <= 0 && output.batteryMilliVolts > 2000)
+        {
+            PowerManagerMessage power_msg;
+            power_msg.shutdown_requested = true;
+
+            if (xQueueSend(power_manager_queue, &power_msg, 0) == pdTRUE)
+            {
+                printf("Shutdown requested: sensor task sent request and suspending self\n");
+                vTaskSuspend(NULL);
+            }
+        }
 
         {
             std::lock_guard<std::mutex> lock(uiMutex);
@@ -101,6 +156,8 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(gpio_install_isr_service(0));
 
     commsQueue = xQueueCreate(10, sizeof(DataMessage));
+    power_manager_queue = xQueueCreate(10, sizeof(PowerManagerMessage));
+
     Comms::init();
 
     xTaskCreatePinnedToCore(
@@ -109,7 +166,7 @@ extern "C" void app_main(void)
         4096,
         NULL,
         4,
-        NULL,
+        &comms_task_handle,
         0);
 
     xTaskCreatePinnedToCore(
@@ -118,7 +175,7 @@ extern "C" void app_main(void)
         8192,
         NULL,
         1,
-        NULL,
+        &ui_task_handle,
         0);
 
     xTaskCreatePinnedToCore(
@@ -127,6 +184,15 @@ extern "C" void app_main(void)
         8192,
         NULL,
         5,
+        NULL,
+        1);
+
+    xTaskCreatePinnedToCore(
+        vPowerManagerTask,
+        "PowerManagerTask",
+        4096,
+        NULL,
+        3,
         NULL,
         1);
 }

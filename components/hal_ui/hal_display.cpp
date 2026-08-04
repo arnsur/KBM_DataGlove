@@ -6,6 +6,8 @@
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
 #include "esp_timer.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <lvgl.h>
 #include "ui/ui.h"
 
@@ -15,6 +17,7 @@ namespace HalDisplay
     const uint16_t SCREEN_HEIGHT = 240;
 
     static esp_lcd_panel_handle_t panel_handle = NULL;
+    static esp_lcd_panel_io_handle_t io_handle = NULL;
     static lv_disp_draw_buf_t disp_buf;
     static lv_color_t buf[SCREEN_WIDTH * 20];
 
@@ -48,6 +51,12 @@ namespace HalDisplay
         data->state = (local_click && local_input_mode == 1) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL; 
     }
 
+    void set_brightness(uint32_t brightness) // Brightness range: 0 - 4096
+    {
+        ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, brightness));
+        ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0));
+    }
+
     void init()
     {
         spi_bus_config_t spi_bus_config = {};
@@ -59,7 +68,6 @@ namespace HalDisplay
         spi_bus_config.max_transfer_sz = SCREEN_WIDTH * 20 * sizeof(uint16_t);
         ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &spi_bus_config, SPI_DMA_CH_AUTO));
 
-        esp_lcd_panel_io_handle_t io_handle = NULL;
         esp_lcd_panel_io_spi_config_t lcd_io_config = {};
         lcd_io_config.cs_gpio_num = TFT_CS;
         lcd_io_config.dc_gpio_num = TFT_DC;
@@ -106,8 +114,7 @@ namespace HalDisplay
         disp_bl_channel_config.timer_sel = LEDC_TIMER_0;
         ESP_ERROR_CHECK(ledc_channel_config(&disp_bl_channel_config));
 
-        ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 2048)); // 0 - 4096
-        ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0));
+        set_brightness(2048); // 50% brightness on startup
 
         lv_init();
         lv_disp_draw_buf_init(&disp_buf, buf, NULL, SCREEN_WIDTH * 20);
@@ -367,6 +374,28 @@ namespace HalDisplay
         // }
 
         lv_timer_handler();
+    }
+
+    void sleep()
+    {
+        if (io_handle == NULL) return;
+        
+        printf("HalDisplay::sleep: disabling display and backlight\n");
+        set_brightness(0);
+        esp_lcd_panel_disp_on_off(panel_handle, false);
+
+        uint8_t display_brightness = 0;
+        ESP_ERROR_CHECK(esp_lcd_panel_io_tx_param(io_handle, 0x51, &display_brightness, 1));
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+        esp_lcd_panel_io_tx_param(io_handle, 0x10, NULL, 0);
+        vTaskDelay(pdMS_TO_TICKS(10));
+
+        ESP_ERROR_CHECK(ledc_stop(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 0));
+        gpio_set_direction(TFT_BL, GPIO_MODE_OUTPUT);
+        gpio_set_level(TFT_BL, 0);
+        gpio_hold_en(TFT_BL);
+        printf("HalDisplay::sleep: TFT_BL set low and held\n");
     }
 }
 

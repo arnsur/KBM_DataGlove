@@ -247,4 +247,11 @@ namespace HalIMU
 
         return true;
     }
+
+    void sleep()
+    {
+        gpio_intr_disable(IMU_INT);
+        sh2_devSleep();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
 }

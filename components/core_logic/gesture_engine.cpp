@@ -139,6 +139,7 @@ namespace GestureEngine
 
         // pct = (v-LOW)/(HIGH - LOW)
         out.batteryPct = (int)(100.0f * (((float)(batterySmoothedMilliVolts - BATTERY_MILLIVOLTS_DIVIDER_MIN))/(BATTERY_MILLIVOLTS_DIVIDER_MAX - BATTERY_MILLIVOLTS_DIVIDER_MIN)));
+        out.batteryMilliVolts = batterySmoothedMilliVolts * 2;
 
         if (lastYaw == 0)
         {

@@ -16,6 +16,11 @@ typedef struct DataMessage
     char keysPressed[6];
 } DataMessage;
 
+typedef struct PowerManagerMessage
+{
+    bool shutdown_requested;
+} PowerManagerMessage;
+
 enum ConnectionStatus
 {
     CONNECTED,
@@ -57,4 +62,5 @@ struct EngineOutput
     int16_t uiCursorX;
     int16_t uiCursorY;
     int batteryPct;
+    float batteryMilliVolts;
 };
