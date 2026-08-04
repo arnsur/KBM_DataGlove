@@ -18,8 +18,8 @@ typedef struct ReceiverMessage
 
 typedef struct ModeUpdateMessage
 {
-    int currentInputMode;
-    bool wakeUpComms;
+    int newInputMode;
+    int newMouseMode;
 } ModeUpdateMessage;
 
 typedef struct CommsMessage
