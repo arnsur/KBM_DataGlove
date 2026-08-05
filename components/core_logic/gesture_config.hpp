@@ -4,11 +4,28 @@
 namespace GestureConfig
 {
 
-    enum Finger { INDEX, MIDDLE, RING, PINKY };
-    enum BendZone { NUM_ROW, TOP_ROW, HOME_ROW, BOTTOM_ROW };
-    enum RotZone { COL_MAIN, COL_ALT };
+    enum Finger
+    {
+        INDEX,
+        MIDDLE,
+        RING,
+        PINKY
+    };
+    enum BendZone
+    {
+        NUM_ROW,
+        TOP_ROW,
+        HOME_ROW,
+        BOTTOM_ROW
+    };
+    enum RotZone
+    {
+        COL_MAIN,
+        COL_ALT
+    };
 
-    struct FingerProfile {
+    struct FingerProfile
+    {
         int bottomValMain;
         int homeValMain;
 
@@ -20,49 +37,87 @@ namespace GestureConfig
         int rowSensor;
         int colSensor;
     };
-    
-    struct FingerGridPos {
+
+    struct FingerGridPos
+    {
         BendZone row;
         RotZone column;
     };
 
-    constexpr char KEY_MAP[4][4][2] = {
-    //--------------------------INDEX--------------------------
-    {
-        //MAIN | ALT
-        { '7', '6'}, // NUM
-        { 'u', 'y'}, // TOP
-        { 'j', 'h'}, // HOME
-        { 'm', 'n'} // BOTTOM
-    },
+    enum class KeyType {STANDARD, MODIFIER};
+    
+    struct Key {
+        uint8_t keycode;
+        KeyType type;
+    };
 
-    //-------------------------MIDDLE--------------------------
-    {
-        //MAIN | ALT (NONE)
-        { '8', '\0'}, // NUM
-        { 'i', '\0'}, // TOP
-        { 'k', '\0'}, // HOME
-        { ',', '\0'} // BOTTOM
-    },
+    // --- Null Char ---
+    constexpr Key KEY_NONE = {0x00, KeyType::STANDARD};
 
-    //---------------------------RING--------------------------
-    {
-        //MAIN | ALT (NONE)
-        { '9', '\0'}, // NUM
-        { 'o', '\0'}, // TOP
-        { 'l', '\0'}, // HOME
-        { '.', '\0'} // BOTTOM
-    },
+    // --- Keys ---
+    constexpr Key KEY_6 = {0x23, KeyType::STANDARD};
+    constexpr Key KEY_7 = {0x24, KeyType::STANDARD};
+    constexpr Key KEY_8 = {0x25, KeyType::STANDARD};
+    constexpr Key KEY_9 = {0x26, KeyType::STANDARD};
+    constexpr Key KEY_0 = {0x27, KeyType::STANDARD};
 
-    //--------------------------PINKY--------------------------
-    {
-        //MAIN | ALT
-        { '0', '\0'}, // NUM
-        { 'p', '\0'}, // TOP
-        { ';', '\0'}, // HOME
-        { '/', '\0'} // BOTTOM
-    }
-};
+    constexpr Key KEY_Y = {0x1C, KeyType::STANDARD};
+    constexpr Key KEY_U = {0x18, KeyType::STANDARD};
+    constexpr Key KEY_I = {0x0C, KeyType::STANDARD};
+    constexpr Key KEY_O = {0x12, KeyType::STANDARD};
+    constexpr Key KEY_P = {0x13, KeyType::STANDARD};
+
+    constexpr Key KEY_H = {0x0B, KeyType::STANDARD};
+    constexpr Key KEY_J = {0x0D, KeyType::STANDARD};
+    constexpr Key KEY_K = {0x0E, KeyType::STANDARD};
+    constexpr Key KEY_L = {0x0F, KeyType::STANDARD};
+    constexpr Key KEY_SEMICOLON = {0x33, KeyType::STANDARD};
+    
+    constexpr Key KEY_N = {0x11, KeyType::STANDARD};
+    constexpr Key KEY_M = {0x10, KeyType::STANDARD};
+    constexpr Key KEY_COMMA= {0x36, KeyType::STANDARD};
+    constexpr Key KEY_PERIOD = {0x37, KeyType::STANDARD};
+    constexpr Key KEY_FWSLASH = {0x38, KeyType::STANDARD};
+
+    // --- Modifiers (TO BE ADDED) ----
+
+    constexpr Key KEY_MAP[4][4][2] = {
+        //--------------------------INDEX--------------------------
+        {
+            // MAIN | ALT
+            {KEY_7, KEY_6}, // NUM
+            {KEY_U, KEY_Y}, // TOP
+            {KEY_J, KEY_H}, // HOME
+            {KEY_M, KEY_N}  // BOTTOM
+        },
+
+        //-------------------------MIDDLE--------------------------
+        {
+            // MAIN | ALT (NONE)
+            {KEY_8, KEY_NONE},    // NUM
+            {KEY_I, KEY_NONE},    // TOP
+            {KEY_K, KEY_NONE},    // HOME
+            {KEY_COMMA, KEY_NONE} // BOTTOM
+        },
+
+        //---------------------------RING--------------------------
+        {
+            // MAIN | ALT (NONE)
+            {KEY_9, KEY_NONE},     // NUM
+            {KEY_O, KEY_NONE},     // TOP
+            {KEY_L, KEY_NONE},     // HOME
+            {KEY_PERIOD, KEY_NONE} // BOTTOM
+        },
+
+        //--------------------------PINKY--------------------------
+        {
+            // MAIN | ALT (IN DEVELOPMENT)
+            {KEY_0, KEY_NONE},         // NUM
+            {KEY_P, KEY_NONE},         // TOP
+            {KEY_SEMICOLON, KEY_NONE}, // HOME
+            {KEY_FWSLASH, KEY_NONE}      // BOTTOM
+        }
+    };
 
     // --- Finger Profiles ---
     constexpr FingerProfile indexProfile = {
@@ -84,7 +139,7 @@ namespace GestureConfig
 
         .bottomValAlt = 2530,
         .homeValAlt = 2360,
-        
+
         .altColVal = 9999.0f,
 
         .rowSensor = 8,
@@ -97,7 +152,7 @@ namespace GestureConfig
 
         .bottomValAlt = 2610,
         .homeValAlt = 2455,
-        
+
         .altColVal = 9999.0f,
 
         .rowSensor = 9,
@@ -110,7 +165,7 @@ namespace GestureConfig
 
         .bottomValAlt = 2610,
         .homeValAlt = 2455,
-        
+
         .altColVal = 9999.0f,
 
         .rowSensor = 10,

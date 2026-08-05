@@ -67,7 +67,7 @@ namespace Comms
 
         esp_now_peer_info_t peerInfo = {};
         memcpy(peerInfo.peer_addr, RECEIVER_ADDRESS, 6);
-        peerInfo.channel = 0; // 0 means use the current Wi-Fi channel
+        peerInfo.channel = 0;
         peerInfo.encrypt = false;
 
         ESP_ERROR_CHECK(esp_now_add_peer(&peerInfo));
@@ -95,8 +95,8 @@ namespace Comms
 
         final_message.hand_id = 1;
 
-        final_message.mouseX = 0;
-        final_message.mouseY = 0;
+        final_message.deltaMouseX = 0;
+        final_message.deltaMouseY = 0;
         final_message.scrollTicks = 0;
 
         final_message.leftClick = false;

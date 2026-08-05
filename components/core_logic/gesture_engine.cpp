@@ -132,6 +132,7 @@ namespace GestureEngine
         out.newInputMode = currentInputMode;
         out.newMouseMode = currentMouseMode;
         out.uiClick = false;
+        out.message.modifier_bitmask = 0;
 
         int batteryDividerMilliVoltsRaw = currentGloveState.batteryDividerMilliVolts;
         if (batterySmoothedMilliVolts == 0) batterySmoothedMilliVolts = batteryDividerMilliVoltsRaw; 
@@ -330,13 +331,13 @@ namespace GestureEngine
 
         if (currentTimeMillis - lastStateChangeTime < CLICK_FREEZE_MS || currentInputMode > 1)
         {
-            out.message.mouseX = 0;
-            out.message.mouseY = 0;
+            out.message.deltaMouseX = 0;
+            out.message.deltaMouseY = 0;
         }
         else
         {
-            out.message.mouseX = (int8_t)mouseX;
-            out.message.mouseY = (int8_t)mouseY;
+            out.message.deltaMouseX = (int8_t)mouseX;
+            out.message.deltaMouseY = (int8_t)mouseY;
         }
 
         out.message.leftClick = lmbClicked;
@@ -362,23 +363,25 @@ namespace GestureEngine
         switch (currentInputMode)
         {
         case 0: // Mouse mode
-            memset(out.message.keysPressed, '\0', sizeof(out.message.keysPressed));
+            memset(out.message.keysPressed, GestureConfig::KEY_NONE.keycode, sizeof(out.message.keysPressed));
+            out.message.modifier_bitmask = 0;
             break;
         case 1: // UI mode
-            out.message.mouseX = 0;
-            out.message.mouseY = 0;
+            out.message.deltaMouseX = 0;
+            out.message.deltaMouseY = 0;
             out.message.scrollTicks = 0;
             out.message.leftClick = false;
             out.message.rightClick = false;
             out.message.middleClick = false;
             out.message.mouseFwd = false;
             out.message.mouseBack = false;
-            memset(out.message.keysPressed, '\0', sizeof(out.message.keysPressed));
+            memset(out.message.keysPressed, GestureConfig::KEY_NONE.keycode, sizeof(out.message.keysPressed));
+            out.message.modifier_bitmask = 0;
             break;
 
         case 2: // Keyboard mode
-            out.message.mouseX = 0;
-            out.message.mouseY = 0;
+            out.message.deltaMouseX = 0;
+            out.message.deltaMouseY = 0;
             out.message.scrollTicks = 0;
             out.message.leftClick = false;
             out.message.rightClick = false;
@@ -386,20 +389,53 @@ namespace GestureEngine
             out.message.mouseFwd = false;
             out.message.mouseBack = false;
 
+            // TODO: TURN THIS INTO A FOR LOOP
             if (currentGloveState.muxValues[4] > 500) {
-                out.message.keysPressed[3] = KEY_MAP[PINKY][getFingerRowCol(pinkyProfile, currentGloveState).row][getFingerRowCol(pinkyProfile, currentGloveState).column];
+                Key key_pressed = KEY_MAP[PINKY][getFingerRowCol(pinkyProfile, currentGloveState).row][getFingerRowCol(pinkyProfile, currentGloveState).column];
+                if (key_pressed.type == KeyType::STANDARD)
+                {
+                    out.message.keysPressed[3] = key_pressed.keycode;
+                }
+                else if (key_pressed.type == KeyType::MODIFIER)
+                {
+                    out.message.modifier_bitmask |= key_pressed.keycode;
+                }
             }
             
             if (currentGloveState.muxValues[3] > 500) {
-                out.message.keysPressed[2] = KEY_MAP[RING][getFingerRowCol(ringProfile, currentGloveState).row][getFingerRowCol(ringProfile, currentGloveState).column];
+                Key key_pressed = KEY_MAP[RING][getFingerRowCol(ringProfile, currentGloveState).row][getFingerRowCol(ringProfile, currentGloveState).column];
+                if (key_pressed.type == KeyType::STANDARD)
+                {
+                    out.message.keysPressed[2] = key_pressed.keycode;
+                }
+                else if (key_pressed.type == KeyType::MODIFIER)
+                {
+                    out.message.modifier_bitmask |= key_pressed.keycode;
+                }
             }
 
             if (currentGloveState.muxValues[2] > 500) {
-                out.message.keysPressed[1] = KEY_MAP[MIDDLE][getFingerRowCol(middleProfile, currentGloveState).row][getFingerRowCol(middleProfile, currentGloveState).column];
+                Key key_pressed = KEY_MAP[MIDDLE][getFingerRowCol(middleProfile, currentGloveState).row][getFingerRowCol(middleProfile, currentGloveState).column];
+                if (key_pressed.type == KeyType::STANDARD)
+                {
+                    out.message.keysPressed[1] = key_pressed.keycode;
+                }
+                else if (key_pressed.type == KeyType::MODIFIER)
+                {
+                    out.message.modifier_bitmask |= key_pressed.keycode;
+                }
             }
 
             if (currentGloveState.muxValues[1] > 500) {
-                out.message.keysPressed[0] = KEY_MAP[INDEX][getFingerRowCol(indexProfile, currentGloveState).row][getFingerRowCol(indexProfile, currentGloveState).column];
+                Key key_pressed = KEY_MAP[INDEX][getFingerRowCol(indexProfile, currentGloveState).row][getFingerRowCol(indexProfile, currentGloveState).column];
+                if (key_pressed.type == KeyType::STANDARD)
+                {
+                    out.message.keysPressed[0] = key_pressed.keycode;
+                }
+                else if (key_pressed.type == KeyType::MODIFIER)
+                {
+                    out.message.modifier_bitmask |= key_pressed.keycode;
+                }
             }
 
             if (currentGloveState.muxValues[0] > 500) {
@@ -409,19 +445,20 @@ namespace GestureEngine
             break;
 
         case 3: // Rest mode
-            out.message.mouseX = 0;
-            out.message.mouseY = 0;
+            out.message.deltaMouseX = 0;
+            out.message.deltaMouseY = 0;
             out.message.scrollTicks = 0;
             out.message.leftClick = false;
             out.message.rightClick = false;
             out.message.middleClick = false;
             out.message.mouseFwd = false;
             out.message.mouseBack = false;
-            memset(out.message.keysPressed, '\0', sizeof(out.message.keysPressed));
+            memset(out.message.keysPressed, GestureConfig::KEY_NONE.keycode, sizeof(out.message.keysPressed));
+            out.message.modifier_bitmask = 0;
             break;
         }
 
-        // Clamp to UI screen edges (320x240)
+        // Clamp UI cursor to UI screen edges (320x240)
         if (cursor_x < 0)
             cursor_x = 0;
         if (cursor_x > 319)

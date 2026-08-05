@@ -2,18 +2,19 @@
 #include <cstdint>
 #include <array>
 
-typedef struct ReceiverMessage
+typedef struct __attribute__((packed)) ReceiverMessage
 {
     uint8_t hand_id;
-    int8_t mouseX;
-    int8_t mouseY;
+    int8_t deltaMouseX;
+    int8_t deltaMouseY;
     int8_t scrollTicks;
     bool leftClick;
     bool rightClick;
     bool middleClick;
     bool mouseFwd;
     bool mouseBack;
-    char keysPressed[6];
+    uint8_t keysPressed[6];
+    uint8_t modifier_bitmask;
 } ReceiverMessage;
 
 typedef struct ModeUpdateMessage
