@@ -68,6 +68,8 @@ struct UIState
     int16_t uiCursorY;
     int batteryPct;
     std::array<int, 12> muxValues;
+    float yaw;
+    float roll;
 };
 
 struct EngineOutput
@@ -80,6 +82,8 @@ struct EngineOutput
     bool uiClick;
     int16_t uiCursorX;
     int16_t uiCursorY;
+    float yaw;
+    float roll;
     int batteryPct;
     float batteryMilliVolts;
 };

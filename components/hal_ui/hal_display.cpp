@@ -10,6 +10,7 @@
 #include "freertos/task.h"
 #include <lvgl.h>
 #include "ui/ui.h"
+#include <stdio.h>
 
 namespace HalDisplay
 {
@@ -317,8 +318,11 @@ namespace HalDisplay
         lv_bar_set_value(ui_Flex10BarR, currentUIState.muxValues[10], LV_ANIM_OFF);
         lv_bar_set_value(ui_Flex11BarR, currentUIState.muxValues[11], LV_ANIM_OFF);
 
-        // TODO: ADD YAW ROLL TO UI
-        // lv_label_set_text_fmt(ui_IMUYawRollLabelR, "Yaw: %.2f°\nRoll: %.2f°", smoothedYawDeg, smoothedRollDeg);
+        {
+            char imu_buf[64];
+            snprintf(imu_buf, sizeof(imu_buf), "Yaw: %.2f°\nRoll: %.2f°", currentUIState.yaw, currentUIState.roll);
+            lv_label_set_text(ui_IMUYawRollLabelR, imu_buf);
+        }
 
         // if (lastLeftTelemetryRecvTime != 0 && (millis() - lastLeftTelemetryRecvTime > 5000)) {
         //     lToRecvConnStatus = UNKNOWN;

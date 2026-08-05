@@ -118,6 +118,8 @@ void vSensorTask(void *pvParameters)
             uiState.uiCursorY = output.uiCursorY;
             uiState.batteryPct = output.batteryPct;
             uiState.hasClicked = output.uiClick;
+            uiState.yaw = output.yaw;
+            uiState.roll = output.roll;
 
             for (int i = 0; i < 12; i++)
             {

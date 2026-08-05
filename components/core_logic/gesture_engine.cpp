@@ -157,6 +157,9 @@ namespace GestureEngine
         smoothedYawDeg = (MOUSE_SMOOTHING_ALPHA * currentYawDeg) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedYawDeg);
         smoothedRollDeg = (MOUSE_SMOOTHING_ALPHA * currentRollDeg) + ((1.0 - MOUSE_SMOOTHING_ALPHA) * smoothedRollDeg);
 
+        out.yaw = smoothedYawDeg;
+        out.roll = smoothedRollDeg;
+
         float yawDisplacement = smoothedYawDeg - lastYaw;
         lastYaw = smoothedYawDeg;
         float rollDisplacement = smoothedRollDeg - lastRoll;
