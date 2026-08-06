@@ -177,4 +177,15 @@ namespace Comms
         printf("Comms::sleep: stopping Wi-Fi\n");
         esp_wifi_stop();
     }
+
+    void wake_up_comms()
+    {
+        recv_peer.search_timed_out = false;
+        recv_peer.first_fail_time = 0;
+        comms_status.r_to_recv_conn_status = SEARCHING;
+
+        left_peer.search_timed_out = false;
+        left_peer.first_fail_time = 0;
+        comms_status.r_to_l_conn_status = SEARCHING;
+    }
 }

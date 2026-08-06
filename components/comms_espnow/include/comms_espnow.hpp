@@ -22,4 +22,6 @@ namespace Comms
     void vCommsTask(void *pvParameters);
 
     void sleep();
+
+    void wake_up_comms();
 }

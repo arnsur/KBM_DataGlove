@@ -8,4 +8,6 @@ namespace HalDisplay
     void update_display(UIState &currentUIState);
 
     void sleep();
+
+    extern bool comms_wakeup_requested;
 }

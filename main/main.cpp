@@ -176,6 +176,12 @@ void vUITask(void *pvParameters)
 
         HalDisplay::update_display(localUIState);
 
+        if (HalDisplay::comms_wakeup_requested)
+        {
+            Comms::wake_up_comms();
+            HalDisplay::comms_wakeup_requested = false;
+        }
+
         vTaskDelay(pdMS_TO_TICKS(33));
     }
 }

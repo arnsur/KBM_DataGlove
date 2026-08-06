@@ -15,6 +15,8 @@
 
 namespace HalDisplay
 {
+    bool comms_wakeup_requested = false;
+
     const uint16_t SCREEN_WIDTH = 320;
     const uint16_t SCREEN_HEIGHT = 240;
 
@@ -402,10 +404,11 @@ namespace HalDisplay
         gpio_hold_en(TFT_BL);
         printf("HalDisplay::sleep: TFT_BL set low and held\n");
     }
-}
 
-extern "C" {
-    void on_comms_search_click(lv_event_t * e) {
-        printf("UI EVENT: Reconnect button clicked!\n");
+    extern "C" {
+        void on_comms_search_click(lv_event_t * e) {
+            printf("Waking up comms...\n");
+            comms_wakeup_requested = true;
+        }
     }
 }
