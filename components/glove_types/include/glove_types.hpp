@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <array>
+#include <atomic>
 #include "esp_timer.h"
 
 typedef struct __attribute__((packed)) ReceiverMessage
@@ -20,8 +21,8 @@ typedef struct __attribute__((packed)) ReceiverMessage
 
 typedef struct ModeUpdateMessage
 {
-    int newInputMode;
-    int newMouseMode;
+    uint8_t newInputMode;
+    uint8_t newMouseMode;
 } ModeUpdateMessage;
 
 typedef struct CommsMessage
@@ -50,15 +51,8 @@ enum ConnectionStatus
 };
 
 struct PeerConnection {
-    bool search_timed_out;
-    int64_t first_fail_time;
+    std::atomic<bool> search_timed_out;
 };
-
-// TODO: MOVE THIS TO A GLOBAL CONFIG FILE
-inline int64_t curr_time_ms()
-{
-    return esp_timer_get_time() / 1000;
-}
 
 struct GloveState
 {

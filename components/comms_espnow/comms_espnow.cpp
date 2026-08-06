@@ -14,6 +14,8 @@
 
 extern QueueHandle_t commsQueue;
 
+TimerHandle_t xTimeoutTimerHandle = NULL;
+
 EventGroupHandle_t final_msg_event = NULL;
 
 constexpr int FINAL_MESSAGE_RECEIVED = (1 << 0);
@@ -23,6 +25,7 @@ EventBits_t shutdown_bits;
 
 namespace Comms
 {
+
     CommsStatus comms_status = {
         .r_to_recv_conn_status = SEARCHING,
         .r_to_l_conn_status = SEARCHING,
@@ -31,12 +34,16 @@ namespace Comms
 
     PeerConnection recv_peer = {
         .search_timed_out = false,
-        .first_fail_time = 0
     };
     PeerConnection left_peer = {
         .search_timed_out = false,
-        .first_fail_time = 0
     };
+
+    void vTimeoutCallback(TimerHandle_t xTimer)
+    {
+        recv_peer.search_timed_out.store(true, std::memory_order_release);
+        comms_status.r_to_recv_conn_status = DISCONNECTED;
+    }
 
     void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int data_len)
     {
@@ -51,8 +58,8 @@ namespace Comms
         {
             if (status == ESP_NOW_SEND_SUCCESS)
             {
-                recv_peer.search_timed_out = false;
-                recv_peer.first_fail_time = 0;
+                xTimerStop(xTimeoutTimerHandle, 0);
+                recv_peer.search_timed_out.store(false, std::memory_order_release);
                 comms_status.r_to_recv_conn_status = CONNECTED;
 
                 if (finalMessageSent.load(std::memory_order_acquire))
@@ -64,11 +71,13 @@ namespace Comms
                     }
                 }
             } else {
-                if (recv_peer.first_fail_time == 0)
+                if (!recv_peer.search_timed_out.load(std::memory_order_acquire))
                 {
-                    // Start searching on for the receiver on first fail
-                    recv_peer.first_fail_time = curr_time_ms();
-                    comms_status.r_to_recv_conn_status = SEARCHING;
+                    if (xTimerIsTimerActive(xTimeoutTimerHandle) == pdFALSE)
+                    {
+                        xTimerStart(xTimeoutTimerHandle, 0);
+                        comms_status.r_to_recv_conn_status = SEARCHING;
+                    }
                 }
             }
         }
@@ -76,6 +85,8 @@ namespace Comms
 
     void init()
     {
+        xTimeoutTimerHandle = xTimerCreate("TimeoutTimer", pdMS_TO_TICKS(MAX_SEARCH_TIME_S * 1000), pdFALSE, (void*) 0, vTimeoutCallback);
+
         esp_err_t ret = nvs_flash_init();
         if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
         {
@@ -180,12 +191,12 @@ namespace Comms
 
     void wake_up_comms()
     {
+        xTimerReset(xTimeoutTimerHandle, 0);   
+
         recv_peer.search_timed_out = false;
-        recv_peer.first_fail_time = 0;
         comms_status.r_to_recv_conn_status = SEARCHING;
 
         left_peer.search_timed_out = false;
-        left_peer.first_fail_time = 0;
         comms_status.r_to_l_conn_status = SEARCHING;
     }
 }

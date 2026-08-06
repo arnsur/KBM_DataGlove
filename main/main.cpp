@@ -128,16 +128,8 @@ void vSensorTask(void *pvParameters)
                 uiState.muxValues[i] = currentState.muxValues[i];
             }
         }
-
-        if (!Comms::recv_peer.search_timed_out 
-            && Comms::recv_peer.first_fail_time != 0 
-            && (curr_time_ms() - Comms::recv_peer.first_fail_time > (Comms::MAX_SEARCH_TIME_S * 1000)))
-        {
-            Comms::recv_peer.search_timed_out = true;
-            Comms::comms_status.r_to_recv_conn_status = DISCONNECTED;
-        }
         
-        if (!Comms::recv_peer.search_timed_out)
+        if (!Comms::recv_peer.search_timed_out.load(std::memory_order_acquire))
         {
             CommsMessage comms_message = {};
             memcpy(comms_message.address, Comms::RECEIVER_ADDRESS, 6);
