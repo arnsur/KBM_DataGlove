@@ -129,13 +129,24 @@ void vSensorTask(void *pvParameters)
             }
         }
 
-        CommsMessage comms_message = {};
-        memcpy(comms_message.address, Comms::RECEIVER_ADDRESS, 6);
-        comms_message.payload_length = sizeof(ReceiverMessage);
-
-        comms_message.payload.receiver_message = output.message;
-
-        xQueueSend(commsQueue, &comms_message, 0);
+        if (!Comms::recv_peer.search_timed_out 
+            && Comms::recv_peer.first_fail_time != 0 
+            && (curr_time_ms() - Comms::recv_peer.first_fail_time > (Comms::MAX_SEARCH_TIME_S * 1000)))
+        {
+            Comms::recv_peer.search_timed_out = true;
+            Comms::comms_status.r_to_recv_conn_status = DISCONNECTED;
+        }
+        
+        if (!Comms::recv_peer.search_timed_out)
+        {
+            CommsMessage comms_message = {};
+            memcpy(comms_message.address, Comms::RECEIVER_ADDRESS, 6);
+            comms_message.payload_length = sizeof(ReceiverMessage);
+    
+            comms_message.payload.receiver_message = output.message;
+    
+            xQueueSend(commsQueue, &comms_message, 0);
+        }
 
         BaseType_t task_delayed = xTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
 
@@ -159,6 +170,7 @@ void vUITask(void *pvParameters)
     {
         {
             std::lock_guard<std::mutex> lock(uiMutex);
+            uiState.comms_status = Comms::comms_status;
             localUIState = uiState;
         }
 

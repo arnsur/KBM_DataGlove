@@ -1,4 +1,3 @@
-#include "comms_espnow.hpp"
 #include "esp_now.h"
 #include "esp_wifi.h"
 #include "esp_netif.h"
@@ -6,9 +5,12 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/event_groups.h"
+#include "esp_timer.h"
 #include <cstring>
 #include <stdio.h>
 #include <atomic>
+
+#include "comms_espnow.hpp"
 
 extern QueueHandle_t commsQueue;
 
@@ -21,18 +23,52 @@ EventBits_t shutdown_bits;
 
 namespace Comms
 {
+    CommsStatus comms_status = {
+        .r_to_recv_conn_status = SEARCHING,
+        .r_to_l_conn_status = SEARCHING,
+        .l_to_recv_conn_status = UNKNOWN
+    };
+
+    PeerConnection recv_peer = {
+        .search_timed_out = false,
+        .first_fail_time = 0
+    };
+    PeerConnection left_peer = {
+        .search_timed_out = false,
+        .first_fail_time = 0
+    };
+
+    void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int data_len)
+    {
+
+    }
+
     std::atomic<bool> finalMessageSent{false};
 
     void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
     {
         if (memcmp(tx_info->des_addr, RECEIVER_ADDRESS, 6) == 0)
         {
-            if (finalMessageSent.load(std::memory_order_acquire) && status == ESP_NOW_SEND_SUCCESS)
+            if (status == ESP_NOW_SEND_SUCCESS)
             {
-                finalMessageSent.store(false, std::memory_order_release);
-                if (final_msg_event != NULL)
+                recv_peer.search_timed_out = false;
+                recv_peer.first_fail_time = 0;
+                comms_status.r_to_recv_conn_status = CONNECTED;
+
+                if (finalMessageSent.load(std::memory_order_acquire))
                 {
-                    xEventGroupSetBits(final_msg_event, FINAL_MESSAGE_RECEIVED);
+                    finalMessageSent.store(false, std::memory_order_release);
+                    if (final_msg_event != NULL)
+                    {
+                        xEventGroupSetBits(final_msg_event, FINAL_MESSAGE_RECEIVED);
+                    }
+                }
+            } else {
+                if (recv_peer.first_fail_time == 0)
+                {
+                    // Start searching on for the receiver on first fail
+                    recv_peer.first_fail_time = curr_time_ms();
+                    comms_status.r_to_recv_conn_status = SEARCHING;
                 }
             }
         }

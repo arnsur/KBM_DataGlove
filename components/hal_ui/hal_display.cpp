@@ -1,5 +1,3 @@
-#include "hal_display.hpp"
-#include "board_config.hpp"
 #include "driver/spi_master.h"
 #include "driver/ledc.h"
 #include "esp_lcd_panel_io.h"
@@ -11,6 +9,9 @@
 #include <lvgl.h>
 #include "ui/ui.h"
 #include <stdio.h>
+
+#include "hal_display.hpp"
+#include "board_config.hpp"
 
 namespace HalDisplay
 {
@@ -230,36 +231,36 @@ namespace HalDisplay
 
         //------------------------------------PEER CONNECTION LABELS---------------------------------------------
         // Mini status bar does not get text changes so it stays condensed
-        // if (rToRecvConnStatus == CONNECTED) {
-        //     lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nCONNECTED");
-        //     lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+        if (currentUIState.comms_status.r_to_recv_conn_status == CONNECTED) {
+            lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nCONNECTED");
+            lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN);
 
-        //     lv_label_set_text(ui_SettingsRRecvConLabel, "R<>RECV:\nCONNECTED");
-        //     lv_obj_set_style_text_color(ui_SettingsRRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_SettingsRRecvConLabel, "R<>RECV:\nCONNECTED");
+            lv_obj_set_style_text_color(ui_SettingsRRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN);
 
-        //     lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // } else if (rToRecvConnStatus == DISCONNECTED) {
-        //     lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nDISCONNECTED");
-        //     lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN);
+        } else if (currentUIState.comms_status.r_to_recv_conn_status == DISCONNECTED) {
+            lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nDISCONNECTED");
+            lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN);
 
-        //     lv_label_set_text(ui_SettingsRRecvConLabel, "R<>RECV:\nDISCONNECTED");
-        //     lv_obj_set_style_text_color(ui_SettingsRRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_SettingsRRecvConLabel, "R<>RECV:\nDISCONNECTED");
+            lv_obj_set_style_text_color(ui_SettingsRRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN);
 
-        //     lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // } else if (rToRecvConnStatus == SEARCHING) {
-        //     lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nSEARCHING");
-        //     lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN);
+        } else if (currentUIState.comms_status.r_to_recv_conn_status == SEARCHING) {
+            lv_label_set_text(ui_HomeRRecvConLabel, "R<>RECV:\nSEARCHING");
+            lv_obj_set_style_text_color(ui_HomeRRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN);
 
-        //     lv_label_set_text(ui_SettingsRRecvConLabel, "R<>RECV:\nSEARCHING");
-        //     lv_obj_set_style_text_color(ui_SettingsRRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_SettingsRRecvConLabel, "R<>RECV:\nSEARCHING");
+            lv_obj_set_style_text_color(ui_SettingsRRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN);
 
-        //     lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // }
+            lv_obj_set_style_text_color(ui_DevRRecvLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+        }
 
-        //     if (lToRConnStatus == CONNECTED) {
+        // if (lToRConnStatus == CONNECTED) {
         //     lv_label_set_text(ui_HomeLRConLabel, "L<-R:\nCONNECTED");
         //     lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
 
