@@ -19,11 +19,26 @@ typedef struct __attribute__((packed)) ReceiverMessage
     uint8_t modifier_bitmask;
 } ReceiverMessage;
 
-typedef struct ModeUpdateMessage
+enum ConnectionStatus
+{
+    CONNECTED,
+    DISCONNECTED,
+    SEARCHING,
+    UNKNOWN
+};
+
+typedef struct __attribute__((packed)) LeftModeUpdateMessage
 {
     uint8_t newInputMode;
     uint8_t newMouseMode;
-} ModeUpdateMessage;
+    bool wakeUpComms;
+} LeftModeUpdateMessage;
+
+typedef struct __attribute__((packed)) LeftTelemetryMessage
+{
+    std::array<int, 12> muxValues;
+    ConnectionStatus l_to_recv_conn_status;
+} LeftTelemetryMessage;
 
 typedef struct CommsMessage
 {
@@ -33,7 +48,7 @@ typedef struct CommsMessage
     union
     {
         ReceiverMessage receiver_message;
-        ModeUpdateMessage mode_update_message;
+        LeftModeUpdateMessage mode_update_message;
     } payload;
 } CommsMessage;
 
@@ -41,14 +56,6 @@ typedef struct PowerManagerMessage
 {
     bool shutdown_requested;
 } PowerManagerMessage;
-
-enum ConnectionStatus
-{
-    CONNECTED,
-    DISCONNECTED,
-    SEARCHING,
-    UNKNOWN
-};
 
 struct PeerConnection {
     std::atomic<bool> search_timed_out;
@@ -80,7 +87,8 @@ struct UIState
     int16_t uiCursorX;
     int16_t uiCursorY;
     int batteryPct;
-    std::array<int, 12> muxValues;
+    std::array<int, 12> rightMuxValues;
+    std::array<int, 12> leftMuxValues;
     float yaw;
     float roll;
     CommsStatus comms_status;

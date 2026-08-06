@@ -125,7 +125,7 @@ void vSensorTask(void *pvParameters)
 
             for (int i = 0; i < 12; i++)
             {
-                uiState.muxValues[i] = currentState.muxValues[i];
+                uiState.rightMuxValues[i] = currentState.muxValues[i];
             }
         }
         
@@ -163,6 +163,15 @@ void vUITask(void *pvParameters)
         {
             std::lock_guard<std::mutex> lock(uiMutex);
             uiState.comms_status = Comms::comms_status;
+
+            taskENTER_CRITICAL(&Comms::left_telemetry_mux);
+            if (Comms::left_telemetry_available)
+            {
+                uiState.leftMuxValues = Comms::left_mux_values;
+                Comms::left_telemetry_available = false;
+            }
+            taskEXIT_CRITICAL(&Comms::left_telemetry_mux);
+
             localUIState = uiState;
         }
 

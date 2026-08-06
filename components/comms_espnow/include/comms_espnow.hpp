@@ -14,6 +14,12 @@ namespace Comms
     extern PeerConnection recv_peer;
 
     extern PeerConnection left_peer;
+    
+    extern std::array<int, 12> left_mux_values;
+    
+    extern bool left_telemetry_available;
+
+    extern portMUX_TYPE left_telemetry_mux;
 
     constexpr int MAX_SEARCH_TIME_S = 10;
 

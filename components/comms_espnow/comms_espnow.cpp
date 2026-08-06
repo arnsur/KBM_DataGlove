@@ -15,6 +15,7 @@
 extern QueueHandle_t commsQueue;
 
 TimerHandle_t xTimeoutTimerHandle = NULL;
+TimerHandle_t xLeftWatchdogTimerHandle = NULL;
 
 EventGroupHandle_t final_msg_event = NULL;
 
@@ -29,7 +30,7 @@ namespace Comms
     CommsStatus comms_status = {
         .r_to_recv_conn_status = SEARCHING,
         .r_to_l_conn_status = SEARCHING,
-        .l_to_recv_conn_status = UNKNOWN
+        .l_to_recv_conn_status = SEARCHING
     };
 
     PeerConnection recv_peer = {
@@ -39,26 +40,91 @@ namespace Comms
         .search_timed_out = false,
     };
 
+    std::array<int, 12> left_mux_values;
+    bool left_telemetry_available = false;
+    portMUX_TYPE left_telemetry_mux = portMUX_INITIALIZER_UNLOCKED;
+
+    void check_and_stop_timer()
+    {
+        bool r_recv_resolved = (comms_status.r_to_recv_conn_status != SEARCHING);
+        bool r_l_resolved = (comms_status.r_to_l_conn_status != SEARCHING);
+        
+        bool l_recv_resolved = (comms_status.l_to_recv_conn_status == CONNECTED || 
+                                comms_status.l_to_recv_conn_status == DISCONNECTED);
+
+        if (r_recv_resolved && r_l_resolved && l_recv_resolved)
+        {
+            if (xTimerIsTimerActive(xTimeoutTimerHandle) != pdFALSE)
+            {
+                xTimerStop(xTimeoutTimerHandle, 0);
+            }
+        }
+    }
+
     void vTimeoutCallback(TimerHandle_t xTimer)
     {
-        recv_peer.search_timed_out.store(true, std::memory_order_release);
-        comms_status.r_to_recv_conn_status = DISCONNECTED;
+        if (comms_status.r_to_recv_conn_status == SEARCHING)
+        {
+            recv_peer.search_timed_out.store(true, std::memory_order_release);
+            comms_status.r_to_recv_conn_status = DISCONNECTED;
+        }
+
+        if (comms_status.r_to_l_conn_status == SEARCHING)
+        {
+            left_peer.search_timed_out.store(true, std::memory_order_release);
+            comms_status.r_to_l_conn_status = DISCONNECTED;
+        }
+
+        if (comms_status.l_to_recv_conn_status == SEARCHING)
+        {
+            comms_status.l_to_recv_conn_status = UNKNOWN;
+        }
+    }
+
+    void vLeftWatchdogCallback(TimerHandle_t xTimer)
+    {
+        if (comms_status.l_to_recv_conn_status == CONNECTED || comms_status.l_to_recv_conn_status == DISCONNECTED)
+        {
+            comms_status.l_to_recv_conn_status = UNKNOWN;
+            printf("Left glove telemetry lost.\n");
+        }
     }
 
     void OnDataRecv(const esp_now_recv_info_t *esp_now_info, const uint8_t *data, int data_len)
     {
+        if (memcmp(esp_now_info->src_addr, LEFT_GLOVE_ADDRESS, 6) == 0)
+        {
+            if (data_len == sizeof(LeftTelemetryMessage))
+            {
+                LeftTelemetryMessage* msg = (LeftTelemetryMessage*)data;
+                comms_status.l_to_recv_conn_status = msg->l_to_recv_conn_status;
 
+                taskENTER_CRITICAL(&left_telemetry_mux);
+                left_mux_values = msg->muxValues;
+                left_telemetry_available = true;
+                taskEXIT_CRITICAL(&left_telemetry_mux);
+
+                if (xLeftWatchdogTimerHandle != NULL)
+                {
+                    xTimerReset(xLeftWatchdogTimerHandle, 0);
+                }
+
+                check_and_stop_timer();
+            }
+        }
     }
 
     std::atomic<bool> finalMessageSent{false};
 
     void OnDataSent(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
     {
-        if (memcmp(tx_info->des_addr, RECEIVER_ADDRESS, 6) == 0)
+        bool is_receiver = memcmp(tx_info->des_addr, RECEIVER_ADDRESS, 6) == 0;
+        bool is_left = memcmp(tx_info->des_addr, LEFT_GLOVE_ADDRESS, 6) == 0;
+
+        if (is_receiver)
         {
             if (status == ESP_NOW_SEND_SUCCESS)
             {
-                xTimerStop(xTimeoutTimerHandle, 0);
                 recv_peer.search_timed_out.store(false, std::memory_order_release);
                 comms_status.r_to_recv_conn_status = CONNECTED;
 
@@ -70,22 +136,46 @@ namespace Comms
                         xEventGroupSetBits(final_msg_event, FINAL_MESSAGE_RECEIVED);
                     }
                 }
-            } else {
+            } 
+            else 
+            {
                 if (!recv_peer.search_timed_out.load(std::memory_order_acquire))
                 {
+                    comms_status.r_to_recv_conn_status = SEARCHING;
                     if (xTimerIsTimerActive(xTimeoutTimerHandle) == pdFALSE)
                     {
                         xTimerStart(xTimeoutTimerHandle, 0);
-                        comms_status.r_to_recv_conn_status = SEARCHING;
                     }
                 }
             }
         }
+        else if (is_left)
+        {
+            if (status == ESP_NOW_SEND_SUCCESS)
+            {
+                left_peer.search_timed_out.store(false, std::memory_order_release);
+                comms_status.r_to_l_conn_status = CONNECTED;
+            }
+            else
+            {
+                if (!left_peer.search_timed_out.load(std::memory_order_acquire))
+                {
+                    comms_status.r_to_l_conn_status = SEARCHING;
+                    if (xTimerIsTimerActive(xTimeoutTimerHandle) == pdFALSE)
+                    {
+                        xTimerStart(xTimeoutTimerHandle, 0);
+                    }
+                }
+            }
+        }
+
+        check_and_stop_timer();
     }
 
     void init()
     {
         xTimeoutTimerHandle = xTimerCreate("TimeoutTimer", pdMS_TO_TICKS(MAX_SEARCH_TIME_S * 1000), pdFALSE, (void*) 0, vTimeoutCallback);
+        xLeftWatchdogTimerHandle = xTimerCreate("LeftWatchdog", pdMS_TO_TICKS(2000), pdFALSE, (void*) 0, vLeftWatchdogCallback);
 
         esp_err_t ret = nvs_flash_init();
         if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -111,15 +201,23 @@ namespace Comms
             ESP_ERROR_CHECK(ESP_ERR_NO_MEM);
         }
         esp_now_register_send_cb(OnDataSent);
+        esp_now_register_recv_cb(OnDataRecv);
 
-        esp_now_peer_info_t peerInfo = {};
-        memcpy(peerInfo.peer_addr, RECEIVER_ADDRESS, 6);
-        peerInfo.channel = 0;
-        peerInfo.encrypt = false;
+        esp_now_peer_info_t recvPeerInfo = {};
+        memcpy(recvPeerInfo.peer_addr, RECEIVER_ADDRESS, 6);
+        recvPeerInfo.channel = 0;
+        recvPeerInfo.encrypt = false;
+        ESP_ERROR_CHECK(esp_now_add_peer(&recvPeerInfo));
 
-        ESP_ERROR_CHECK(esp_now_add_peer(&peerInfo));
+        esp_now_peer_info_t leftPeerInfo = {};
+        memcpy(leftPeerInfo.peer_addr, LEFT_GLOVE_ADDRESS, 6);
+        leftPeerInfo.channel = 0;
+        leftPeerInfo.encrypt = false;
+        ESP_ERROR_CHECK(esp_now_add_peer(&leftPeerInfo));
 
         printf("ESP-NOW Initialized cleanly.\n");
+
+        xTimerStart(xTimeoutTimerHandle, 0);
     }
 
     void vCommsTask(void *pvParameters)
@@ -191,12 +289,14 @@ namespace Comms
 
     void wake_up_comms()
     {
-        xTimerReset(xTimeoutTimerHandle, 0);   
+        xTimerReset(xTimeoutTimerHandle, 0);
 
-        recv_peer.search_timed_out = false;
+        recv_peer.search_timed_out.store(false, std::memory_order_release);
         comms_status.r_to_recv_conn_status = SEARCHING;
 
-        left_peer.search_timed_out = false;
+        left_peer.search_timed_out.store(false, std::memory_order_release);
         comms_status.r_to_l_conn_status = SEARCHING;
+
+        comms_status.l_to_recv_conn_status = SEARCHING;
     }
 }

@@ -262,64 +262,102 @@ namespace HalDisplay
             lv_obj_set_style_text_color(ui_DevRRecvLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN);
         }
 
-        // if (lToRConnStatus == CONNECTED) {
-        //     lv_label_set_text(ui_HomeLRConLabel, "L<-R:\nCONNECTED");
-        //     lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+        if (currentUIState.comms_status.r_to_l_conn_status == CONNECTED) {
+            lv_label_set_text(ui_HomeLRConLabel, "L<>R:\nCONNECTED");
+            lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN);
 
-        //     lv_label_set_text(ui_SettingsLRConLabel, "L<-R:\nCONNECTED");
-        //     lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_SettingsLRConLabel, "L<>R:\nCONNECTED");
+            lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN);
 
-        //     lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // } else if (lToRConnStatus == DISCONNECTED) {
-        //     lv_label_set_text(ui_HomeLRConLabel, "L<-R:\nDISCONNECTED");
-        //     lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN);
+        } else if (currentUIState.comms_status.r_to_l_conn_status == DISCONNECTED) {
+            lv_label_set_text(ui_HomeLRConLabel, "L<>R:\nDISCONNECTED");
+            lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN);
 
-        //     lv_label_set_text(ui_SettingsLRConLabel, "L<-R:\nDISCONNECTED");
-        //     lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_SettingsLRConLabel, "L<>R:\nDISCONNECTED");
+            lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN);
 
-        //     lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // } else if (lToRConnStatus == SEARCHING) {
-        //     lv_label_set_text(ui_HomeLRConLabel, "L<-R:\nSEARCHING");
-        //     lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN);
+        } else if (currentUIState.comms_status.r_to_l_conn_status == SEARCHING) {
+            lv_label_set_text(ui_HomeLRConLabel, "L<>R:\nSEARCHING");
+            lv_obj_set_style_text_color(ui_HomeLRConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN);
 
-        //     lv_label_set_text(ui_SettingsLRConLabel, "L<-R:\nSEARCHING");
-        //     lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(ui_SettingsLRConLabel, "L<>R:\nSEARCHING");
+            lv_obj_set_style_text_color(ui_SettingsLRConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN);
 
-        //     lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // }
+            lv_obj_set_style_text_color(ui_DevLRLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevLRLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+        }
+
+        if (currentUIState.comms_status.l_to_recv_conn_status == CONNECTED) {
+            lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nCONNECTED");
+            lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN);
+
+            lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nCONNECTED");
+            lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN);
+
+            lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN);
+        } else if (currentUIState.comms_status.l_to_recv_conn_status == DISCONNECTED) {
+            lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nDISCONNECTED");
+            lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN);
+
+            lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nDISCONNECTED");
+            lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN);
+
+            lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN);
+        } else if (currentUIState.comms_status.l_to_recv_conn_status == SEARCHING) {
+            lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nSEARCHING");
+            lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+
+            lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nSEARCHING");
+            lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+
+            lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN);
+        } else if (currentUIState.comms_status.l_to_recv_conn_status == UNKNOWN) {
+            lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nUNKNOWN");
+            lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0x000000), LV_PART_MAIN);
+
+            lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nUNKNOWN");
+            lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0x000000), LV_PART_MAIN);
+
+            lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0x000000), LV_PART_MAIN);
+            lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0x000000), LV_PART_MAIN);
+        }
 
         //------------------------------------DEVELOPER SCREEN---------------------------------------------
         lv_label_set_text_fmt(ui_FSRReadingsLabelR, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)",
-            currentUIState.muxValues[0], 100 * currentUIState.muxValues[0]/4096,
-            currentUIState.muxValues[1], 100 * currentUIState.muxValues[1]/4096,
-            currentUIState.muxValues[2], 100 * currentUIState.muxValues[2]/4096,
-            currentUIState.muxValues[3], 100 * currentUIState.muxValues[3]/4096,
-            currentUIState.muxValues[4], 100 * currentUIState.muxValues[4]/4096);
-        lv_bar_set_value(ui_FSR0BarR, currentUIState.muxValues[0], LV_ANIM_OFF);
-        lv_bar_set_value(ui_FSR1BarR, currentUIState.muxValues[1], LV_ANIM_OFF);
-        lv_bar_set_value(ui_FSR2BarR, currentUIState.muxValues[2], LV_ANIM_OFF);
-        lv_bar_set_value(ui_FSR3BarR, currentUIState.muxValues[3], LV_ANIM_OFF);
-        lv_bar_set_value(ui_FSR4BarR, currentUIState.muxValues[4], LV_ANIM_OFF);
+            currentUIState.rightMuxValues[0], 100 * currentUIState.rightMuxValues[0]/4096,
+            currentUIState.rightMuxValues[1], 100 * currentUIState.rightMuxValues[1]/4096,
+            currentUIState.rightMuxValues[2], 100 * currentUIState.rightMuxValues[2]/4096,
+            currentUIState.rightMuxValues[3], 100 * currentUIState.rightMuxValues[3]/4096,
+            currentUIState.rightMuxValues[4], 100 * currentUIState.rightMuxValues[4]/4096);
+        lv_bar_set_value(ui_FSR0BarR, currentUIState.rightMuxValues[0], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR1BarR, currentUIState.rightMuxValues[1], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR2BarR, currentUIState.rightMuxValues[2], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR3BarR, currentUIState.rightMuxValues[3], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR4BarR, currentUIState.rightMuxValues[4], LV_ANIM_OFF);
 
         lv_label_set_text_fmt(ui_FlexReadingsLabelR, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)",
-            currentUIState.muxValues[5], 100 * currentUIState.muxValues[5]/4096,
-            currentUIState.muxValues[6], 100 * currentUIState.muxValues[6]/4096,
-            currentUIState.muxValues[7], 100 * currentUIState.muxValues[7]/4096,
-            currentUIState.muxValues[8], 100 * currentUIState.muxValues[8]/4096,
-            currentUIState.muxValues[9], 100 * currentUIState.muxValues[9]/4096,
-            currentUIState.muxValues[10], 100 * currentUIState.muxValues[10]/4096,
-            currentUIState.muxValues[11], 100 * currentUIState.muxValues[11]/4096);
+            currentUIState.rightMuxValues[5], 100 * currentUIState.rightMuxValues[5]/4096,
+            currentUIState.rightMuxValues[6], 100 * currentUIState.rightMuxValues[6]/4096,
+            currentUIState.rightMuxValues[7], 100 * currentUIState.rightMuxValues[7]/4096,
+            currentUIState.rightMuxValues[8], 100 * currentUIState.rightMuxValues[8]/4096,
+            currentUIState.rightMuxValues[9], 100 * currentUIState.rightMuxValues[9]/4096,
+            currentUIState.rightMuxValues[10], 100 * currentUIState.rightMuxValues[10]/4096,
+            currentUIState.rightMuxValues[11], 100 * currentUIState.rightMuxValues[11]/4096);
         
-        lv_bar_set_value(ui_Flex5BarR, currentUIState.muxValues[5], LV_ANIM_OFF);
-        lv_bar_set_value(ui_Flex6BarR, currentUIState.muxValues[6], LV_ANIM_OFF);
-        lv_bar_set_value(ui_Flex7BarR, currentUIState.muxValues[7], LV_ANIM_OFF);
-        lv_bar_set_value(ui_Flex8BarR, currentUIState.muxValues[8], LV_ANIM_OFF);
-        lv_bar_set_value(ui_Flex9BarR, currentUIState.muxValues[9], LV_ANIM_OFF);
-        lv_bar_set_value(ui_Flex10BarR, currentUIState.muxValues[10], LV_ANIM_OFF);
-        lv_bar_set_value(ui_Flex11BarR, currentUIState.muxValues[11], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex5BarR, currentUIState.rightMuxValues[5], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex6BarR, currentUIState.rightMuxValues[6], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex7BarR, currentUIState.rightMuxValues[7], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex8BarR, currentUIState.rightMuxValues[8], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex9BarR, currentUIState.rightMuxValues[9], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex10BarR, currentUIState.rightMuxValues[10], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex11BarR, currentUIState.rightMuxValues[11], LV_ANIM_OFF);
 
         {
             char imu_buf[64];
@@ -327,58 +365,34 @@ namespace HalDisplay
             lv_label_set_text(ui_IMUYawRollLabelR, imu_buf);
         }
 
-        // if (lastLeftTelemetryRecvTime != 0 && (millis() - lastLeftTelemetryRecvTime > 5000)) {
-        //     lToRecvConnStatus = UNKNOWN;
-        // }
-        // if (newLeftTelemetryAvailable) {
-        //     int leftSensorValues[11];
-        //     memcpy(leftSensorValues, (void*) leftTelemetryData.sensorData, sizeof(leftTelemetryData.sensorData));
-        //     lToRecvConnStatus = leftTelemetryData.connectionStatus;
+        lv_label_set_text_fmt(ui_FSRReadingsLabelL, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)",
+            currentUIState.leftMuxValues[0], 100 * currentUIState.leftMuxValues[0]/4096,
+            currentUIState.leftMuxValues[1], 100 * currentUIState.leftMuxValues[1]/4096,
+            currentUIState.leftMuxValues[2], 100 * currentUIState.leftMuxValues[2]/4096,
+            currentUIState.leftMuxValues[3], 100 * currentUIState.leftMuxValues[3]/4096,
+            currentUIState.leftMuxValues[4], 100 * currentUIState.leftMuxValues[4]/4096);
+        lv_bar_set_value(ui_FSR0BarL, currentUIState.leftMuxValues[0], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR1BarL, currentUIState.leftMuxValues[1], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR2BarL, currentUIState.leftMuxValues[2], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR3BarL, currentUIState.leftMuxValues[3], LV_ANIM_OFF);
+        lv_bar_set_value(ui_FSR4BarL, currentUIState.leftMuxValues[4], LV_ANIM_OFF);
 
-        //     lv_label_set_text_fmt(ui_FSRReadingsLabelL, "%d (%d%%)",
-        //         leftSensorValues[0], 100 * leftSensorValues[0]/4096);
-        //     lv_bar_set_value(ui_FSR0BarL, leftSensorValues[0], LV_ANIM_OFF);
-
-        //     newLeftTelemetryAvailable = false;
-        // }
-
-        // if (lToRecvConnStatus == CONNECTED) {
-        //     lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nCONNECTED");
-        //     lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nCONNECTED");
-        //     lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0x31FF52), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // } else if (lToRecvConnStatus == DISCONNECTED) {
-        //     lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nDISCONNECTED");
-        //     lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nDISCONNECTED");
-        //     lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // } else if (lToRecvConnStatus == SEARCHING) {
-        //     lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nSEARCHING");
-        //     lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nSEARCHING");
-        //     lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0xFFDD00), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // } else if (lToRecvConnStatus == UNKNOWN) {
-        //     lv_label_set_text(ui_HomeLRecvConLabel, "L<>RECV:\nUNKNOWN");
-        //     lv_obj_set_style_text_color(ui_HomeLRecvConLabel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_label_set_text(ui_SettingsLRecvConLabel, "L<>RECV:\nUNKNOWN");
-        //     lv_obj_set_style_text_color(ui_SettingsLRecvConLabel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelR, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        //     lv_obj_set_style_text_color(ui_DevLRecvLabelL, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-        // }
+        lv_label_set_text_fmt(ui_FlexReadingsLabelL, "%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)\n%d (%d%%)",
+            currentUIState.leftMuxValues[5], 100 * currentUIState.leftMuxValues[5]/4096,
+            currentUIState.leftMuxValues[6], 100 * currentUIState.leftMuxValues[6]/4096,
+            currentUIState.leftMuxValues[7], 100 * currentUIState.leftMuxValues[7]/4096,
+            currentUIState.leftMuxValues[8], 100 * currentUIState.leftMuxValues[8]/4096,
+            currentUIState.leftMuxValues[9], 100 * currentUIState.leftMuxValues[9]/4096,
+            currentUIState.leftMuxValues[10], 100 * currentUIState.leftMuxValues[10]/4096,
+            currentUIState.leftMuxValues[11], 100 * currentUIState.leftMuxValues[11]/4096);
+        
+        lv_bar_set_value(ui_Flex5BarL, currentUIState.leftMuxValues[5], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex6BarL, currentUIState.leftMuxValues[6], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex7BarL, currentUIState.leftMuxValues[7], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex8BarL, currentUIState.leftMuxValues[8], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex9BarL, currentUIState.leftMuxValues[9], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex10BarL, currentUIState.leftMuxValues[10], LV_ANIM_OFF);
+        lv_bar_set_value(ui_Flex11BarL, currentUIState.leftMuxValues[11], LV_ANIM_OFF);
 
         lv_timer_handler();
     }
