@@ -73,12 +73,14 @@ void vSensorTask(void *pvParameters)
 
     GloveState currentState = {};
 
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+
     while (1)
     {
         currentState.muxValues = HalAnalog::getSensorValues();
         currentState.batteryDividerMilliVolts = HalAnalog::readBatteryDividerMilliVolts();
 
-        if (HalIMU::is_data_ready())
+        while (HalIMU::is_data_ready())
         {
             sh2_service();
         }
@@ -135,7 +137,13 @@ void vSensorTask(void *pvParameters)
 
         xQueueSend(commsQueue, &comms_message, 0);
 
-        vTaskDelay(pdMS_TO_TICKS(10));
+        BaseType_t task_delayed = xTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
+
+        if (task_delayed == pdFALSE)
+        {
+            printf("vSensorTask took longer than the delay interval.\n");
+        }
+
     }
 
     vTaskDelete(NULL);
@@ -164,7 +172,7 @@ extern "C" void app_main(void)
 {
     ESP_ERROR_CHECK(gpio_install_isr_service(0));
 
-    commsQueue = xQueueCreate(10, sizeof(CommsMessage));
+    commsQueue = xQueueCreate(20, sizeof(CommsMessage));
     power_manager_queue = xQueueCreate(10, sizeof(PowerManagerMessage));
 
     Comms::init();
@@ -183,7 +191,7 @@ extern "C" void app_main(void)
         "UITask",
         8192,
         NULL,
-        1,
+        3,
         &ui_task_handle,
         0);
 

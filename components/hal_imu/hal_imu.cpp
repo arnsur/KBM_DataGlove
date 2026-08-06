@@ -20,8 +20,6 @@ namespace HalIMU
     static i2c_master_bus_handle_t bus_handle = nullptr;
     static i2c_master_dev_handle_t imu_handle = nullptr;
 
-    static volatile bool imu_interrupt_triggered = false;
-
     sh2_Hal_t hal;
 
     struct IMUData
@@ -33,11 +31,6 @@ namespace HalIMU
         bool new_data_available;
     };
     static IMUData imu_data = {0, 0, 0, 0, false};
-
-    static void IRAM_ATTR imu_isr_handler(void *arg)
-    {
-        imu_interrupt_triggered = true;
-    }
 
     void imu_callback(void *cookie, sh2_SensorEvent_t *pEvent)
     {
@@ -57,12 +50,7 @@ namespace HalIMU
 
     bool is_data_ready()
     {
-        if (imu_interrupt_triggered)
-        {
-            imu_interrupt_triggered = false;
-            return true;
-        }
-        return false;
+        return gpio_get_level(IMU_INT) == 0;
     }
 
     static int hal_sh2_open(sh2_Hal_t *self)
@@ -108,17 +96,22 @@ namespace HalIMU
 
         esp_rom_delay_us(200);
 
-        unsigned read_len = (len < 256) ? len : 256;
-
-        esp_err_t err = i2c_master_receive(imu_handle, pBuffer, read_len, pdMS_TO_TICKS(200));
+        uint8_t header[4];
+        esp_err_t err = i2c_master_receive(imu_handle, header, 4, pdMS_TO_TICKS(10));
         if (err != ESP_OK)
         {
             return 0;
         }
 
-        uint16_t packet_len = ((pBuffer[1] & 0x7F) << 8) | pBuffer[0];
+        uint16_t packet_len = ((header[1] & 0x7F) << 8) | header[0];
 
         if (packet_len < 4 || packet_len > len)
+        {
+            return 0;
+        }
+
+        err = i2c_master_receive(imu_handle, pBuffer, packet_len, pdMS_TO_TICKS(10));
+        if (err != ESP_OK)
         {
             return 0;
         }
@@ -171,6 +164,9 @@ namespace HalIMU
         gpio_set_level(IMU_RST, 1);
         vTaskDelay(pdMS_TO_TICKS(500));
 
+        gpio_reset_pin(I2C_SCL);
+        gpio_reset_pin(I2C_SDA);
+
         // I2C master bus config
         i2c_master_bus_config_t i2c_config = {};
         i2c_config.i2c_port = I2C_NUM_0;
@@ -199,8 +195,6 @@ namespace HalIMU
         int_config.pull_up_en = GPIO_PULLUP_ENABLE;
         int_config.intr_type = GPIO_INTR_NEGEDGE;
         ESP_ERROR_CHECK(gpio_config(&int_config));
-
-        ESP_ERROR_CHECK(gpio_isr_handler_add(IMU_INT, imu_isr_handler, nullptr));
 
         // Set SH2 callbacks
         hal.open = hal_sh2_open;

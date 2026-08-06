@@ -56,10 +56,10 @@ namespace HalAnalog
             gpio_set_level(MUX_S2, (i >> 2) & 1);
             gpio_set_level(MUX_S3, (i >> 3) & 1);
 
-            esp_rom_delay_us(150);
+            esp_rom_delay_us(10);
             int dummyRead;
             adc_oneshot_read(adc1_handle, MUX_SIG_CHANNEL, &dummyRead);
-            esp_rom_delay_us(50);
+            esp_rom_delay_us(5);
 
             int signalValue;
             // Alpha-trimmed mean to filter noise for flex sensors (index 5+)
