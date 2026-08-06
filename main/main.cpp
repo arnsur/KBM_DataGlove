@@ -128,16 +128,36 @@ void vSensorTask(void *pvParameters)
                 uiState.rightMuxValues[i] = currentState.muxValues[i];
             }
         }
+
+        TickType_t current_tick = xTaskGetTickCount();
+        static TickType_t last_heartbeat_tick = current_tick;
+
+        bool time_for_heartbeat = (current_tick - last_heartbeat_tick) >= pdMS_TO_TICKS(2000);
+        
+        if ((output.modeChanged || time_for_heartbeat) && !Comms::left_peer.search_timed_out.load(std::memory_order_acquire))
+        {
+            last_heartbeat_tick = current_tick;
+
+            CommsMessage left_comms_message = {};
+            memcpy(left_comms_message.address, Comms::LEFT_GLOVE_ADDRESS, 6);
+            left_comms_message.payload_length = sizeof(LeftModeUpdateMessage);
+            
+            left_comms_message.payload.mode_update_message.newInputMode = output.newInputMode;
+            left_comms_message.payload.mode_update_message.newMouseMode = output.newMouseMode;
+            left_comms_message.payload.mode_update_message.wakeUpComms = false;
+
+            xQueueSend(commsQueue, &left_comms_message, 0);
+        }
         
         if (!Comms::recv_peer.search_timed_out.load(std::memory_order_acquire))
         {
-            CommsMessage comms_message = {};
-            memcpy(comms_message.address, Comms::RECEIVER_ADDRESS, 6);
-            comms_message.payload_length = sizeof(ReceiverMessage);
+            CommsMessage recv_comms_message = {};
+            memcpy(recv_comms_message.address, Comms::RECEIVER_ADDRESS, 6);
+            recv_comms_message.payload_length = sizeof(ReceiverMessage);
     
-            comms_message.payload.receiver_message = output.message;
+            recv_comms_message.payload.receiver_message = output.message;
     
-            xQueueSend(commsQueue, &comms_message, 0);
+            xQueueSend(commsQueue, &recv_comms_message, 0);
         }
 
         BaseType_t task_delayed = xTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
@@ -179,7 +199,16 @@ void vUITask(void *pvParameters)
 
         if (HalDisplay::comms_wakeup_requested)
         {
-            Comms::wake_up_comms();
+            uint8_t latest_input_mode;
+            uint8_t latest_mouse_mode;
+            
+            {
+                std::lock_guard<std::mutex> lock(uiMutex);
+                latest_input_mode = uiState.inputMode;
+                latest_mouse_mode = uiState.mouseMode;
+            }
+
+            Comms::wake_up_comms(latest_input_mode, latest_mouse_mode);
             HalDisplay::comms_wakeup_requested = false;
         }
 

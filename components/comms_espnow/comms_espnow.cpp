@@ -287,7 +287,7 @@ namespace Comms
         esp_wifi_stop();
     }
 
-    void wake_up_comms()
+    void wake_up_comms(uint8_t input_mode, uint8_t mouse_mode)
     {
         xTimerReset(xTimeoutTimerHandle, 0);
 
@@ -298,5 +298,15 @@ namespace Comms
         comms_status.r_to_l_conn_status = SEARCHING;
 
         comms_status.l_to_recv_conn_status = SEARCHING;
+
+        CommsMessage wakeup_msg = {};
+        memcpy(wakeup_msg.address, LEFT_GLOVE_ADDRESS, 6);
+        wakeup_msg.payload_length = sizeof(LeftModeUpdateMessage);
+        
+        wakeup_msg.payload.mode_update_message.newInputMode = input_mode;
+        wakeup_msg.payload.mode_update_message.newMouseMode = mouse_mode;
+        wakeup_msg.payload.mode_update_message.wakeUpComms = true;
+
+        xQueueSend(commsQueue, &wakeup_msg, 0);
     }
 }

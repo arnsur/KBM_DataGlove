@@ -29,5 +29,5 @@ namespace Comms
 
     void sleep();
 
-    void wake_up_comms();
+    void wake_up_comms(uint8_t input_mode, uint8_t mouse_mode);
 }
