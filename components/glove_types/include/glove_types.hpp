@@ -27,7 +27,7 @@ enum ConnectionStatus
     SEARCHING,
 };
 
-enum class InputMode
+enum class InputMode : uint8_t
 {
     IMODE_MOUSE,
     IMODE_UI,
@@ -35,7 +35,7 @@ enum class InputMode
     IMODE_REST,
 };
 
-enum class MouseMode
+enum class MouseMode : uint8_t
 {
     MMODE_MAIN,
     MMODE_ALT,
