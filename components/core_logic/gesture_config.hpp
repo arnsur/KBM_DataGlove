@@ -9,19 +9,19 @@ namespace GestureConfig
         INDEX,
         MIDDLE,
         RING,
-        PINKY
+        PINKY,
     };
     enum BendZone
     {
         NUM_ROW,
         TOP_ROW,
         HOME_ROW,
-        BOTTOM_ROW
+        BOTTOM_ROW,
     };
     enum RotZone
     {
         COL_MAIN,
-        COL_ALT
+        COL_ALT,
     };
 
     struct FingerProfile
@@ -130,7 +130,7 @@ namespace GestureConfig
         .altColVal = 5.5f,
 
         .rowSensor = 7,
-        .colSensor = 6
+        .colSensor = 6,
     };
 
     constexpr FingerProfile middleProfile = {
@@ -143,7 +143,7 @@ namespace GestureConfig
         .altColVal = 9999.0f,
 
         .rowSensor = 8,
-        .colSensor = -1
+        .colSensor = -1,
     };
 
     constexpr FingerProfile ringProfile = {
@@ -156,7 +156,7 @@ namespace GestureConfig
         .altColVal = 9999.0f,
 
         .rowSensor = 9,
-        .colSensor = -1
+        .colSensor = -1,
     };
 
     constexpr FingerProfile pinkyProfile = {
@@ -169,7 +169,7 @@ namespace GestureConfig
         .altColVal = 9999.0f,
 
         .rowSensor = 10,
-        .colSensor = -1
+        .colSensor = -1,
     };
 
     // --- Mouse & UI Multipliers ---

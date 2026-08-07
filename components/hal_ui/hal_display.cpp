@@ -30,7 +30,7 @@ namespace HalDisplay
     static int16_t local_cursor_x = 160;
     static int16_t local_cursor_y = 120;
     static bool local_click = false;
-    static int local_input_mode = 1;
+    static InputMode local_input_mode = InputMode::IMODE_UI;
 
     static bool on_color_trans_done(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx) {
         lv_disp_drv_t *driver = (lv_disp_drv_t *)user_ctx;
@@ -52,7 +52,7 @@ namespace HalDisplay
     static void indev_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
         data->point.x = local_cursor_x;
         data->point.y = local_cursor_y;
-        data->state = (local_click && local_input_mode == 1) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL; 
+        data->state = (local_click && local_input_mode == InputMode::IMODE_UI) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL; 
     }
 
     void set_brightness(uint32_t brightness) // Brightness range: 0 - 4096
@@ -158,16 +158,16 @@ namespace HalDisplay
         local_input_mode = currentUIState.inputMode;
 
         //----------------------------------MODE LABELS----------------------------------------------
-        if (currentUIState.inputMode == 0) {
-            lv_label_set_text_fmt(ui_HomeModeLabel, "%d / %d", currentUIState.inputMode, currentUIState.mouseMode);
-            lv_label_set_text_fmt(ui_SettingsModeLabel, "%d / %d", currentUIState.inputMode, currentUIState.mouseMode);
-            lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d / %d", currentUIState.inputMode, currentUIState.mouseMode);
-            lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d / %d", currentUIState.inputMode, currentUIState.mouseMode);
+        if (currentUIState.inputMode == InputMode::IMODE_MOUSE) {
+            lv_label_set_text_fmt(ui_HomeModeLabel, "%d / %d", static_cast<int>(currentUIState.inputMode), static_cast<int>(currentUIState.mouseMode));
+            lv_label_set_text_fmt(ui_SettingsModeLabel, "%d / %d", static_cast<int>(currentUIState.inputMode), static_cast<int>(currentUIState.mouseMode));
+            lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d / %d", static_cast<int>(currentUIState.inputMode), static_cast<int>(currentUIState.mouseMode));
+            lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d / %d", static_cast<int>(currentUIState.inputMode), static_cast<int>(currentUIState.mouseMode));
         } else {
-            lv_label_set_text_fmt(ui_HomeModeLabel, "%d", currentUIState.inputMode);
-            lv_label_set_text_fmt(ui_SettingsModeLabel, "%d", currentUIState.inputMode);
-            lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d", currentUIState.inputMode);
-            lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d", currentUIState.inputMode);
+            lv_label_set_text_fmt(ui_HomeModeLabel, "%d", static_cast<int>(currentUIState.inputMode));
+            lv_label_set_text_fmt(ui_SettingsModeLabel, "%d", static_cast<int>(currentUIState.inputMode));
+            lv_label_set_text_fmt(ui_DevMiniModeLabelR, "%d", static_cast<int>(currentUIState.inputMode));
+            lv_label_set_text_fmt(ui_DevMiniModeLabelL, "%d", static_cast<int>(currentUIState.inputMode));
         }
 
         //------------------------------------BATTERY LABELS---------------------------------------------

@@ -21,16 +21,30 @@ typedef struct __attribute__((packed)) ReceiverMessage
 
 enum ConnectionStatus
 {
+    UNKNOWN,
     CONNECTED,
     DISCONNECTED,
     SEARCHING,
-    UNKNOWN
+};
+
+enum class InputMode
+{
+    IMODE_MOUSE,
+    IMODE_UI,
+    IMODE_KEYBOARD,
+    IMODE_REST,
+};
+
+enum class MouseMode
+{
+    MMODE_MAIN,
+    MMODE_ALT,
 };
 
 typedef struct __attribute__((packed)) LeftModeUpdateMessage
 {
-    uint8_t newInputMode;
-    uint8_t newMouseMode;
+    InputMode newInputMode;
+    MouseMode newMouseMode;
     bool wakeUpComms;
 } LeftModeUpdateMessage;
 
@@ -81,8 +95,8 @@ struct CommsStatus
 struct UIState
 {
     bool modeChanged;
-    int inputMode;
-    int mouseMode;
+    InputMode inputMode;
+    MouseMode mouseMode;
     bool hasClicked;
     int16_t uiCursorX;
     int16_t uiCursorY;
@@ -99,8 +113,8 @@ struct EngineOutput
     ReceiverMessage message;
 
     bool modeChanged;
-    int newInputMode;
-    int newMouseMode;
+    InputMode newInputMode;
+    MouseMode newMouseMode;
     bool uiClick;
     int16_t uiCursorX;
     int16_t uiCursorY;

@@ -287,7 +287,7 @@ namespace Comms
         esp_wifi_stop();
     }
 
-    void wake_up_comms(uint8_t input_mode, uint8_t mouse_mode)
+    void wake_up_comms(InputMode input_mode, MouseMode mouse_mode)
     {
         xTimerReset(xTimeoutTimerHandle, 0);
 

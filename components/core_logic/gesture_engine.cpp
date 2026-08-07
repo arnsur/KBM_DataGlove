@@ -9,9 +9,9 @@ using namespace GestureConfig;
 namespace GestureEngine
 {
     // --- Mode State Memory ---
-    static int currentInputMode = 1;          // Tracks 0 (Mouse), 1 (UI), 2 (Key), 3 (Rest)
-    static int currentMouseMode = 0;          // Tracks 0 (Clicks), 1 (Scroll/Side)
-    static int lastInputModeBeforeSwitch = 0; // Remembers mode before long-pressing to Rest
+    static InputMode currentInputMode = InputMode::IMODE_UI;
+    static MouseMode currentMouseMode = MouseMode::MMODE_MAIN;
+    static InputMode lastInputModeBeforeSwitch = InputMode::IMODE_MOUSE; // Remembers mode before long-pressing to Rest
 
     // --- Clutch & Switch State Memory ---
     static bool lastClutchState = false;        // Detects the exact moment the clutch is pressed/released
@@ -183,7 +183,7 @@ namespace GestureEngine
             clutchBent = false;
         }
 
-        bool clutchActsAsModeSwitch = !(currentInputMode == 0 && currentMouseMode == 1);
+        bool clutchActsAsModeSwitch = !(currentInputMode == InputMode::IMODE_MOUSE && currentMouseMode == MouseMode::MMODE_ALT);
         if (clutchActsAsModeSwitch)
         {
             // Detect the exact moment the clutch is bent
@@ -198,14 +198,14 @@ namespace GestureEngine
             {
                 if (currentTimeMillis - clutchPressTime > LONG_PRESS_DELAY_MS)
                 {
-                    if (currentInputMode == 3)
+                    if (currentInputMode == InputMode::IMODE_REST)
                     {
                         currentInputMode = lastInputModeBeforeSwitch;
                     }
                     else
                     {
                         lastInputModeBeforeSwitch = currentInputMode;
-                        currentInputMode = 3;
+                        currentInputMode = InputMode::IMODE_REST;
                     }
                     clutchLongPressHandled = true;
                     out.modeChanged = true;
@@ -216,14 +216,14 @@ namespace GestureEngine
             // SHORT PRESS: Cycle Active Modes (0 -> 1 -> 2 -> 0)
             if (!clutchBent && lastClutchState)
             {
-                if (!clutchLongPressHandled && currentInputMode != 3)
+                if (!clutchLongPressHandled && currentInputMode != InputMode::IMODE_REST)
                 {
-                    currentInputMode = (currentInputMode + 1) % 3;
-                    if (currentInputMode == 2)
+                    currentInputMode = static_cast<InputMode>((static_cast<int>(currentInputMode) + 1) % 3);
+                    if (currentInputMode == InputMode::IMODE_KEYBOARD)
                     {
                         keyboardStartYawDeg = smoothedYawDeg;
                     }
-                    currentMouseMode = 0; // Reset mouse mode if the input mode is cycled
+                    currentMouseMode = MouseMode::MMODE_MAIN; // Reset mouse mode if the input mode is cycled
                     out.modeChanged = true;
                     out.newInputMode = currentInputMode;
                 }
@@ -241,15 +241,15 @@ namespace GestureEngine
             switchBent = false;
         }
 
-        if (currentInputMode == 0 && switchBent && lastSwitchState == false)
+        if (currentInputMode == InputMode::IMODE_MOUSE && switchBent && lastSwitchState == false)
         {
-            if (currentMouseMode == 0)
+            if (currentMouseMode == MouseMode::MMODE_MAIN)
             {
-                currentMouseMode = 1;
+                currentMouseMode = MouseMode::MMODE_ALT;
             }
-            else if (currentMouseMode == 1)
+            else if (currentMouseMode == MouseMode::MMODE_ALT)
             {
-                currentMouseMode = 0;
+                currentMouseMode = MouseMode::MMODE_MAIN;
             }
 
             out.modeChanged = true;
@@ -257,50 +257,53 @@ namespace GestureEngine
         }
         lastSwitchState = switchBent;
 
+        bool is_using_mouse = (currentInputMode == InputMode::IMODE_MOUSE || currentInputMode == InputMode::IMODE_UI);
+
         bool lmbClicked = false;
         bool rmbClicked = false;
         bool mmbClicked = false;
         bool mb5Clicked = false;
         bool mb4Clicked = false;
         bool scrollUp = false;
-        bool scrollDown = (currentInputMode <= 1 && currentMouseMode == 1 && (currentGloveState.muxValues[0] > 2100 || currentGloveState.muxValues[5] > 2800));
+        bool scrollDown = (is_using_mouse && currentMouseMode == MouseMode::MMODE_ALT && (currentGloveState.muxValues[0] > 2100 || currentGloveState.muxValues[5] > 2800));
 
-        if (currentInputMode <= 1 && (currentGloveState.muxValues[1] > 2250 || currentGloveState.muxValues[7] > 2700))
+
+        if (is_using_mouse && (currentGloveState.muxValues[1] > 2250 || currentGloveState.muxValues[7] > 2700))
         {
-            if (currentMouseMode == 0)
+            if (currentMouseMode == MouseMode::MMODE_MAIN)
             {
                 lmbClicked = true;
                 mb4Clicked = false;
             }
-            else if (currentMouseMode == 1)
+            else if (currentMouseMode == MouseMode::MMODE_ALT)
             {
                 lmbClicked = false;
                 mb4Clicked = true;
             }
         }
 
-        if (currentInputMode <= 1 && (currentGloveState.muxValues[3] > 2150 || currentGloveState.muxValues[9] > 2600))
+        if (is_using_mouse && (currentGloveState.muxValues[3] > 2150 || currentGloveState.muxValues[9] > 2600))
         {
-            if (currentMouseMode == 0)
+            if (currentMouseMode == MouseMode::MMODE_MAIN)
             {
                 rmbClicked = true;
                 scrollUp = false;
             }
-            else if (currentMouseMode == 1)
+            else if (currentMouseMode == MouseMode::MMODE_ALT)
             {
                 rmbClicked = false;
                 scrollUp = true;
             }
         }
 
-        if (currentInputMode <= 1 && (currentGloveState.muxValues[2] > 2150 || currentGloveState.muxValues[8] > 2600))
+        if (is_using_mouse && (currentGloveState.muxValues[2] > 2150 || currentGloveState.muxValues[8] > 2600))
         {
-            if (currentMouseMode == 0)
+            if (currentMouseMode == MouseMode::MMODE_MAIN)
             {
                 mmbClicked = true;
                 mb5Clicked = false;
             }
-            else if (currentMouseMode == 1)
+            else if (currentMouseMode == MouseMode::MMODE_ALT)
             {
                 mmbClicked = false;
                 mb5Clicked = true;
@@ -332,7 +335,7 @@ namespace GestureEngine
         }
         previousButtons = currentButtons;
 
-        if (currentTimeMillis - lastStateChangeTime < CLICK_FREEZE_MS || currentInputMode > 1)
+        if (currentTimeMillis - lastStateChangeTime < CLICK_FREEZE_MS || !is_using_mouse)
         {
             out.message.deltaMouseX = 0;
             out.message.deltaMouseY = 0;
@@ -350,7 +353,7 @@ namespace GestureEngine
         out.message.mouseFwd = mb5Clicked;
         out.message.mouseBack = mb4Clicked;
 
-        if (currentInputMode == 1)
+        if (currentInputMode == InputMode::IMODE_UI)
         {
             float exactGuiX = (mouseX * GUI_MOUSE_SENS_MULT) + guiRemainderX;
             float exactGuiY = (mouseY * GUI_MOUSE_SENS_MULT) + guiRemainderY;
@@ -365,11 +368,11 @@ namespace GestureEngine
 
         switch (currentInputMode)
         {
-        case 0: // Mouse mode
+        case InputMode::IMODE_MOUSE:
             memset(out.message.keysPressed, GestureConfig::KEY_NONE.keycode, sizeof(out.message.keysPressed));
             out.message.modifier_bitmask = 0;
             break;
-        case 1: // UI mode
+        case InputMode::IMODE_UI:
             out.message.deltaMouseX = 0;
             out.message.deltaMouseY = 0;
             out.message.scrollTicks = 0;
@@ -382,7 +385,7 @@ namespace GestureEngine
             out.message.modifier_bitmask = 0;
             break;
 
-        case 2: // Keyboard mode
+        case InputMode::IMODE_KEYBOARD:
             out.message.deltaMouseX = 0;
             out.message.deltaMouseY = 0;
             out.message.scrollTicks = 0;
@@ -447,7 +450,7 @@ namespace GestureEngine
 
             break;
 
-        case 3: // Rest mode
+        case InputMode::IMODE_REST:
             out.message.deltaMouseX = 0;
             out.message.deltaMouseY = 0;
             out.message.scrollTicks = 0;

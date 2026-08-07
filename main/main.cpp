@@ -199,8 +199,8 @@ void vUITask(void *pvParameters)
 
         if (HalDisplay::comms_wakeup_requested)
         {
-            uint8_t latest_input_mode;
-            uint8_t latest_mouse_mode;
+            InputMode latest_input_mode;
+            MouseMode latest_mouse_mode;
             
             {
                 std::lock_guard<std::mutex> lock(uiMutex);
