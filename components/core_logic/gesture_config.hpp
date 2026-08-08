@@ -173,8 +173,8 @@ namespace GestureConfig
     };
 
     // --- Mouse & UI Multipliers ---
-    constexpr float MOUSE_SENSITIVITY = 60.0f;
-    constexpr float GUI_MOUSE_SENS_MULT = 0.33f;
+    constexpr float MOUSE_SENSITIVITY = 100.0f;
+    constexpr float GUI_MOUSE_SENS_MULT = 0.2f;
     constexpr float MOUSE_SMOOTHING_ALPHA = 0.4f;
 
     // --- Flex Sensor Thresholds ---
@@ -189,4 +189,8 @@ namespace GestureConfig
     constexpr uint32_t LONG_PRESS_DELAY_MS = 550;
     constexpr uint32_t CLICK_FREEZE_MS = 150;
 
+    // --- Battery Config ---
+    constexpr int BATTERY_MILLIVOLTS_DIVIDER_MAX = 2020;
+    constexpr int BATTERY_MILLIVOLTS_DIVIDER_MIN = 1600;
+    constexpr float BATTERY_SMOOTHING_ALPHA = 0.05;
 }

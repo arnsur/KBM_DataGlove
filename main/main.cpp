@@ -88,10 +88,10 @@ void vSensorTask(void *pvParameters)
         float qX, qY, qZ, qReal;
         if (HalIMU::get_quaternion(qX, qY, qZ, qReal))
         {
-            currentState.quatX = qX;
-            currentState.quatY = qY;
-            currentState.quatZ = qZ;
-            currentState.quatReal = qReal;
+            currentState.imu_quaternion.x = qX;
+            currentState.imu_quaternion.y = qY;
+            currentState.imu_quaternion.z = qZ;
+            currentState.imu_quaternion.real = qReal;
         }
 
         EngineOutput output = GestureEngine::processData(currentState);

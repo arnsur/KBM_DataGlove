@@ -75,12 +75,17 @@ struct PeerConnection {
     std::atomic<bool> search_timed_out;
 };
 
+struct Quaternion
+{
+    float x;
+    float y;
+    float z;
+    float real;
+};
+
 struct GloveState
 {
-    float quatReal;
-    float quatX;
-    float quatY;
-    float quatZ;
+    Quaternion imu_quaternion;
     std::array<int, 12> muxValues;
     int batteryDividerMilliVolts;
 };
