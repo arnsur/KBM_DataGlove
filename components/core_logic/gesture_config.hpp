@@ -124,8 +124,8 @@ namespace GestureConfig
         .bottomValMain = 2615,
         .homeValMain = 2455,
 
-        .bottomValAlt = 2575,
-        .homeValAlt = 2425,
+        .bottomValAlt = 2565,
+        .homeValAlt = 2430,
 
         .altColVal = 5.5f,
 
@@ -134,8 +134,8 @@ namespace GestureConfig
     };
 
     constexpr FingerProfile middleProfile = {
-        .bottomValMain = 2530,
-        .homeValMain = 2400,
+        .bottomValMain = 2580,
+        .homeValMain = 2410,
 
         .bottomValAlt = 2530,
         .homeValAlt = 2360,
@@ -151,7 +151,7 @@ namespace GestureConfig
         .homeValMain = 2455,
 
         .bottomValAlt = 2610,
-        .homeValAlt = 2455,
+        .homeValAlt = 2470,
 
         .altColVal = 9999.0f,
 
