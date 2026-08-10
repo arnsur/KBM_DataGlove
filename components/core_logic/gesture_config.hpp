@@ -121,11 +121,11 @@ namespace GestureConfig
 
     // --- Finger Profiles ---
     constexpr FingerProfile indexProfile = {
-        .bottomValMain = 2615,
-        .homeValMain = 2455,
+        .bottomValMain = 2610,
+        .homeValMain = 2445,
 
-        .bottomValAlt = 2565,
-        .homeValAlt = 2430,
+        .bottomValAlt = 2570,
+        .homeValAlt = 2415,
 
         .altColVal = 5.5f,
 
@@ -134,8 +134,8 @@ namespace GestureConfig
     };
 
     constexpr FingerProfile middleProfile = {
-        .bottomValMain = 2580,
-        .homeValMain = 2410,
+        .bottomValMain = 2575,
+        .homeValMain = 2420,
 
         .bottomValAlt = 2530,
         .homeValAlt = 2360,
@@ -147,8 +147,8 @@ namespace GestureConfig
     };
 
     constexpr FingerProfile ringProfile = {
-        .bottomValMain = 2610,
-        .homeValMain = 2455,
+        .bottomValMain = 2655,
+        .homeValMain = 2510,
 
         .bottomValAlt = 2610,
         .homeValAlt = 2470,
@@ -178,7 +178,7 @@ namespace GestureConfig
     constexpr float MOUSE_SMOOTHING_ALPHA = 0.4f;
 
     // --- Flex Sensor Thresholds ---
-    constexpr int CLUTCH_START_THRESHOLD = 2900;
+    constexpr int CLUTCH_START_THRESHOLD = 3000;
     constexpr int CLUTCH_EXIT_THRESHOLD = 2800;
 
     constexpr int SWITCH_START_THRESHOLD = 2650;
