@@ -63,6 +63,7 @@ namespace HalDisplay
 
     void init()
     {
+        // SPI bus config
         spi_bus_config_t spi_bus_config = {};
         spi_bus_config.mosi_io_num = TFT_DIN;
         spi_bus_config.miso_io_num = -1;
@@ -72,11 +73,12 @@ namespace HalDisplay
         spi_bus_config.max_transfer_sz = SCREEN_WIDTH * 20 * sizeof(uint16_t);
         ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &spi_bus_config, SPI_DMA_CH_AUTO));
 
+        // LCD panel io config
         esp_lcd_panel_io_spi_config_t lcd_io_config = {};
         lcd_io_config.cs_gpio_num = TFT_CS;
         lcd_io_config.dc_gpio_num = TFT_DC;
         lcd_io_config.spi_mode = 0;
-        lcd_io_config.pclk_hz = 26 * 1000 * 1000;// 26 MHz because of pin matrix
+        lcd_io_config.pclk_hz = 26'000'000;// 26 MHz because of pin matrix
         lcd_io_config.trans_queue_depth = 10,
         lcd_io_config.on_color_trans_done = on_color_trans_done;
         lcd_io_config.user_ctx = &disp_drv;
@@ -86,6 +88,7 @@ namespace HalDisplay
         lcd_io_config.cs_ena_posttrans = 0;
         ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST, &lcd_io_config, &io_handle));
 
+        // LCD panel device config
         esp_lcd_panel_dev_config_t panel_config = {};
         panel_config.reset_gpio_num = TFT_RST;
         panel_config.rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB;
@@ -95,14 +98,13 @@ namespace HalDisplay
         esp_lcd_panel_reset(panel_handle);
         esp_lcd_panel_init(panel_handle);
         esp_lcd_panel_invert_color(panel_handle, true);
-
         esp_lcd_panel_disp_on_off(panel_handle, true);
         
         // Landscape
         esp_lcd_panel_swap_xy(panel_handle, true);
         esp_lcd_panel_mirror(panel_handle, true, false);
 
-
+        // Backlight timer config
         ledc_timer_config_t disp_bltimer_config = {};
         disp_bltimer_config.speed_mode = LEDC_LOW_SPEED_MODE;
         disp_bltimer_config.timer_num = LEDC_TIMER_0;
@@ -111,6 +113,7 @@ namespace HalDisplay
         disp_bltimer_config.clk_cfg = LEDC_AUTO_CLK;
         ESP_ERROR_CHECK(ledc_timer_config(&disp_bltimer_config));
 
+        // Backlight channel config
         ledc_channel_config_t disp_bl_channel_config = {};
         disp_bl_channel_config.gpio_num = TFT_BL;
         disp_bl_channel_config.speed_mode = LEDC_LOW_SPEED_MODE;
