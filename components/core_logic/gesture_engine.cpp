@@ -79,13 +79,16 @@ namespace GestureEngine
             FingerGridPos fingerPos = {TOP_ROW, COL_MAIN};
             
             int rowVal = sensor_values[profile.rowSensor];
-            int colVal = -1;
+            float colVal = -1;
             
             fingerPos.column = COL_MAIN;
             if (profile.colSensor >= 0)
             {
                 colVal = profile.altColVal;
-                if (imu_kinematics.smoothed_yaw_deg - keyboardStartYawDeg >= colVal)
+
+                float diff = imu_kinematics.smoothed_yaw_deg - keyboardStartYawDeg;
+
+                if ((colVal > 0.0f && diff >= colVal) || (colVal < 0.0f && diff <= colVal))
                 {
                     fingerPos.column = COL_ALT;
                 }

@@ -66,18 +66,21 @@ namespace GestureConfig
     constexpr Key KEY_I = {0x0C, KeyType::STANDARD};
     constexpr Key KEY_O = {0x12, KeyType::STANDARD};
     constexpr Key KEY_P = {0x13, KeyType::STANDARD};
+    constexpr Key KEY_LEFT_BRACKET = {0x2F, KeyType::STANDARD};
 
     constexpr Key KEY_H = {0x0B, KeyType::STANDARD};
     constexpr Key KEY_J = {0x0D, KeyType::STANDARD};
     constexpr Key KEY_K = {0x0E, KeyType::STANDARD};
     constexpr Key KEY_L = {0x0F, KeyType::STANDARD};
     constexpr Key KEY_SEMICOLON = {0x33, KeyType::STANDARD};
+    constexpr Key KEY_APOSTROPHE = {0x34, KeyType::STANDARD};
     
     constexpr Key KEY_N = {0x11, KeyType::STANDARD};
     constexpr Key KEY_M = {0x10, KeyType::STANDARD};
-    constexpr Key KEY_COMMA= {0x36, KeyType::STANDARD};
+    constexpr Key KEY_COMMA = {0x36, KeyType::STANDARD};
     constexpr Key KEY_PERIOD = {0x37, KeyType::STANDARD};
     constexpr Key KEY_FWSLASH = {0x38, KeyType::STANDARD};
+    constexpr Key KEY_RSHIFT = {0x20, KeyType::MODIFIER};
 
     // --- Modifiers (TO BE ADDED) ----
 
@@ -113,9 +116,9 @@ namespace GestureConfig
         {
             // MAIN | ALT (IN DEVELOPMENT)
             {KEY_0, KEY_NONE},         // NUM
-            {KEY_P, KEY_NONE},         // TOP
-            {KEY_SEMICOLON, KEY_NONE}, // HOME
-            {KEY_FWSLASH, KEY_NONE}      // BOTTOM
+            {KEY_P, KEY_LEFT_BRACKET},         // TOP
+            {KEY_SEMICOLON, KEY_APOSTROPHE}, // HOME
+            {KEY_FWSLASH, KEY_RSHIFT}      // BOTTOM
         }
     };
 
@@ -125,7 +128,7 @@ namespace GestureConfig
         .homeValMain = 2445,
 
         .bottomValAlt = 2570,
-        .homeValAlt = 2415,
+        .homeValAlt = 2425,
 
         .altColVal = 5.5f,
 
@@ -161,15 +164,15 @@ namespace GestureConfig
 
     constexpr FingerProfile pinkyProfile = {
         .bottomValMain = 2650,
-        .homeValMain = 2500,
+        .homeValMain = 2485,
 
-        .bottomValAlt = 2610,
-        .homeValAlt = 2455,
+        .bottomValAlt = 2580,
+        .homeValAlt = 2445,
 
-        .altColVal = 9999.0f,
+        .altColVal = -4.0f,
 
         .rowSensor = 10,
-        .colSensor = -1,
+        .colSensor = 11,
     };
 
     // --- Mouse & UI Multipliers ---
