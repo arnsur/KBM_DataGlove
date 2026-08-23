@@ -60,6 +60,7 @@ namespace GestureConfig
     constexpr Key KEY_8 = {0x25, KeyType::STANDARD};
     constexpr Key KEY_9 = {0x26, KeyType::STANDARD};
     constexpr Key KEY_0 = {0x27, KeyType::STANDARD};
+    constexpr Key KEY_MINUS = {0x2D, KeyType::STANDARD};
 
     constexpr Key KEY_Y = {0x1C, KeyType::STANDARD};
     constexpr Key KEY_U = {0x18, KeyType::STANDARD};
@@ -115,11 +116,11 @@ namespace GestureConfig
 
         //--------------------------PINKY--------------------------
         {
-            // MAIN | ALT (IN DEVELOPMENT)
-            {KEY_0, KEY_NONE},         // NUM
-            {KEY_P, KEY_LEFT_BRACKET},         // TOP
+            // MAIN | ALT
+            {KEY_0, KEY_MINUS},              // NUM
+            {KEY_P, KEY_LEFT_BRACKET},       // TOP
             {KEY_SEMICOLON, KEY_APOSTROPHE}, // HOME
-            {KEY_FWSLASH, KEY_RSHIFT}      // BOTTOM
+            {KEY_FWSLASH, KEY_RSHIFT}        // BOTTOM
         }
     };
 

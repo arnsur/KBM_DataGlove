@@ -29,6 +29,9 @@ namespace GestureEngine
         float keyboardStartPitchDeg = 0.0f;
         float keyboardStartRollDeg = 0.0f;
 
+        bool fn_state = false;
+        bool fn_handled = false;
+
         struct BatteryData
         {
             int battery_pct;
@@ -128,6 +131,11 @@ namespace GestureEngine
                     fingerPos.row = TOP_ROW;
                 }
             }
+
+            if (fn_state && fingerPos.row == TOP_ROW)
+            {
+                fingerPos.row = NUM_ROW;
+            }
     
             return fingerPos;
         }
@@ -201,12 +209,21 @@ namespace GestureEngine
                 keyboardStartYawDeg = kinematic_data.smoothed_yaw_deg;
                 keyboardStartPitchDeg = kinematic_data.smoothed_pitch_deg;
                 keyboardStartRollDeg = kinematic_data.smoothed_roll_deg;
-            }            
+            }
 
             if (kinematic_data.smoothed_pitch_deg - keyboardStartPitchDeg >= fn_pitch_threshold)
             {
-                printf("fn\n");
-            } else if (kinematic_data.smoothed_pitch_deg - keyboardStartPitchDeg <= alt_pitch_threshold)
+                if (!fn_handled)
+                {
+                    fn_state = !fn_state;
+                    fn_handled = true;
+                }
+            } else
+            {
+                fn_handled = false;
+            }
+            
+            if (kinematic_data.smoothed_pitch_deg - keyboardStartPitchDeg <= alt_pitch_threshold)
             {
                 engine_recv_message.modifier_bitmask |= KEY_RALT.keycode;
             }
@@ -379,6 +396,8 @@ namespace GestureEngine
                                     keyboardStartRollDeg = imu_kinematics.smoothed_roll_deg;
                                 }
                                 state_.mouse_mode = MouseMode::MMODE_MAIN; // Reset mouse mode if the input mode is cycled
+                                fn_handled = false;
+                                fn_state = false;
                                 state_.mode_changed = true;
                             }
                         }
