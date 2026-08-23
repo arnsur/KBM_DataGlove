@@ -109,6 +109,7 @@ struct UIState
     std::array<int, 12> rightMuxValues;
     std::array<int, 12> leftMuxValues;
     float yaw;
+    float pitch;
     float roll;
     CommsStatus comms_status;
 };
@@ -124,6 +125,7 @@ struct EngineOutput
     int16_t uiCursorX;
     int16_t uiCursorY;
     float yaw;
+    float pitch;
     float roll;
     int batteryPct;
     float batteryMilliVolts;

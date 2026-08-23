@@ -121,6 +121,7 @@ void vSensorTask(void *pvParameters)
             uiState.batteryPct = output.batteryPct;
             uiState.hasClicked = output.uiClick;
             uiState.yaw = output.yaw;
+            uiState.pitch = output.pitch;
             uiState.roll = output.roll;
 
             for (int i = 0; i < 12; i++)

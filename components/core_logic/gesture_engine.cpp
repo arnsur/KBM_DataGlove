@@ -23,8 +23,11 @@ namespace GestureEngine
     };
     
     namespace
-    {        
-        float keyboardStartYawDeg = 0.0f; // Anchors the keyboard grid relative to where mode 2 started
+    {
+        // Anchors the keyboard grid relative to where mode 2 started
+        float keyboardStartYawDeg = 0.0f;
+        float keyboardStartPitchDeg = 0.0f;
+        float keyboardStartRollDeg = 0.0f;
 
         struct BatteryData
         {
@@ -35,6 +38,7 @@ namespace GestureEngine
         struct KinematicData
         {
             float smoothed_yaw_deg;
+            float smoothed_pitch_deg;
             float smoothed_roll_deg;
         };
     
@@ -195,6 +199,21 @@ namespace GestureEngine
     
             if (sensor_values[0] > 500) {
                 keyboardStartYawDeg = kinematic_data.smoothed_yaw_deg;
+                keyboardStartPitchDeg = kinematic_data.smoothed_pitch_deg;
+                keyboardStartRollDeg = kinematic_data.smoothed_roll_deg;
+            }            
+
+            if (kinematic_data.smoothed_pitch_deg - keyboardStartPitchDeg >= fn_pitch_threshold)
+            {
+                printf("fn\n");
+            } else if (kinematic_data.smoothed_pitch_deg - keyboardStartPitchDeg <= alt_pitch_threshold)
+            {
+                engine_recv_message.modifier_bitmask |= KEY_RALT.keycode;
+            }
+
+            if (kinematic_data.smoothed_roll_deg - keyboardStartRollDeg <= ctrl_roll_threshold)
+            {
+                engine_recv_message.modifier_bitmask |= KEY_RCTRL.keycode;
             }
         }
 
@@ -242,10 +261,10 @@ namespace GestureEngine
                     float cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
                     float currentYawDeg = std::atan2(siny_cosp, cosy_cosp) * (180.0f / M_PI);
 
-                    // Pitch calculations if needed in the future
-                    // float sinp = std::sqrt(1.0f + 2.0f * (w * y - x * z));
-                    // float cosp = std::sqrt(1.0f - 2.0f * (w * y - x * z));
-                    // float currentPitchDeg = (2.0f * std::atan2(sinp, cosp) - M_PI / 2.0f) * (180.0f / M_PI);
+                    // Pitch
+                    float sinp = std::sqrt(1.0f + 2.0f * (w * y - x * z));
+                    float cosp = std::sqrt(1.0f - 2.0f * (w * y - x * z));
+                    float currentPitchDeg = (2.0f * std::atan2(sinp, cosp) - M_PI / 2.0f) * (180.0f / M_PI);
 
                     // Roll
                     float sinr_cosp = 2.0f * (w * x + y * z);
@@ -253,9 +272,11 @@ namespace GestureEngine
                     float currentRollDeg = std::atan2(sinr_cosp, cosr_cosp) * (180.0f / M_PI);
 
                     yaw_ = yaw_filter_.update(currentYawDeg);
+                    pitch_ = pitch_filter_.update(currentPitchDeg);
                     roll_ = roll_filter_.update(currentRollDeg);
 
                     out.smoothed_yaw_deg = yaw_;
+                    out.smoothed_pitch_deg = pitch_;
                     out.smoothed_roll_deg = roll_;
 
                     return out;
@@ -263,9 +284,11 @@ namespace GestureEngine
 
             private:
                 float yaw_;
+                float pitch_;
                 float roll_;
 
                 EMAFilter yaw_filter_{MOUSE_SMOOTHING_ALPHA};
+                EMAFilter pitch_filter_{MOUSE_SMOOTHING_ALPHA};
                 EMAFilter roll_filter_{MOUSE_SMOOTHING_ALPHA};
         };
 
@@ -352,6 +375,8 @@ namespace GestureEngine
                                 if (state_.input_mode == InputMode::IMODE_KEYBOARD)
                                 {
                                     keyboardStartYawDeg = imu_kinematics.smoothed_yaw_deg;
+                                    keyboardStartPitchDeg = imu_kinematics.smoothed_pitch_deg;
+                                    keyboardStartRollDeg = imu_kinematics.smoothed_roll_deg;
                                 }
                                 state_.mouse_mode = MouseMode::MMODE_MAIN; // Reset mouse mode if the input mode is cycled
                                 state_.mode_changed = true;
@@ -643,6 +668,7 @@ namespace GestureEngine
         out.batteryPct = battery_data.battery_pct;
         out.batteryMilliVolts = battery_data.battery_millivolts;
         out.yaw = kinematic_data.smoothed_yaw_deg;
+        out.pitch = kinematic_data.smoothed_pitch_deg;
         out.roll = kinematic_data.smoothed_roll_deg;
 
         return out;

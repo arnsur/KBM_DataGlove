@@ -364,7 +364,7 @@ namespace HalDisplay
 
         {
             char imu_buf[64];
-            snprintf(imu_buf, sizeof(imu_buf), "Yaw: %.2f°\nRoll: %.2f°", currentUIState.yaw, currentUIState.roll);
+            snprintf(imu_buf, sizeof(imu_buf), "Yaw: %.2f°\nPitch: %.2f°\nRoll: %.2f°", currentUIState.yaw, currentUIState.pitch, currentUIState.roll);
             lv_label_set_text(ui_IMUYawRollLabelR, imu_buf);
         }
 

@@ -82,7 +82,8 @@ namespace GestureConfig
     constexpr Key KEY_FWSLASH = {0x38, KeyType::STANDARD};
     constexpr Key KEY_RSHIFT = {0x20, KeyType::MODIFIER};
 
-    // --- Modifiers (TO BE ADDED) ----
+    constexpr Key KEY_RALT = {0x40, KeyType::MODIFIER};
+    constexpr Key KEY_RCTRL = {0x10, KeyType::MODIFIER};
 
     constexpr Key KEY_MAP[4][4][2] = {
         //--------------------------INDEX--------------------------
@@ -174,6 +175,10 @@ namespace GestureConfig
         .rowSensor = 10,
         .colSensor = 11,
     };
+
+    float fn_pitch_threshold = 20.0;
+    float alt_pitch_threshold = -20.0;
+    float ctrl_roll_threshold = -25.0;
 
     // --- Mouse & UI Multipliers ---
     constexpr float MOUSE_SENSITIVITY = 100.0f;
