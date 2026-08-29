@@ -89,7 +89,7 @@ namespace GestureEngine
             float colVal = -1;
             
             fingerPos.column = COL_MAIN;
-            if (profile.colSensor >= 0)
+            if (profile.altColVal != 0)
             {
                 colVal = profile.altColVal;
 
@@ -103,6 +103,8 @@ namespace GestureEngine
     
             if (fingerPos.column == COL_ALT)
             {
+                if (profile.farAltVal > 0 && sensor_values[profile.colSensor] >= profile.farAltVal) fingerPos.column = COL_FAR_ALT;
+
                 if (rowVal > profile.bottomValAlt)
                 {
                     fingerPos.row = BOTTOM_ROW;

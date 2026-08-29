@@ -22,6 +22,7 @@ namespace GestureConfig
     {
         COL_MAIN,
         COL_ALT,
+        COL_FAR_ALT,
     };
 
     struct FingerProfile
@@ -33,6 +34,7 @@ namespace GestureConfig
         int homeValAlt;
 
         float altColVal;
+        int farAltVal;
 
         int rowSensor;
         int colSensor;
@@ -61,6 +63,8 @@ namespace GestureConfig
     constexpr Key KEY_9 = {0x26, KeyType::STANDARD};
     constexpr Key KEY_0 = {0x27, KeyType::STANDARD};
     constexpr Key KEY_MINUS = {0x2D, KeyType::STANDARD};
+    constexpr Key KEY_EQUALS = {0x2E, KeyType::STANDARD};
+    constexpr Key KEY_BACKSPACE = {0x2A, KeyType::STANDARD};
 
     constexpr Key KEY_Y = {0x1C, KeyType::STANDARD};
     constexpr Key KEY_U = {0x18, KeyType::STANDARD};
@@ -68,6 +72,8 @@ namespace GestureConfig
     constexpr Key KEY_O = {0x12, KeyType::STANDARD};
     constexpr Key KEY_P = {0x13, KeyType::STANDARD};
     constexpr Key KEY_LEFT_BRACKET = {0x2F, KeyType::STANDARD};
+    constexpr Key KEY_RIGHT_BRACKET = {0x30, KeyType::STANDARD};
+    constexpr Key KEY_BACKSLASH = {0x31, KeyType::STANDARD};
 
     constexpr Key KEY_H = {0x0B, KeyType::STANDARD};
     constexpr Key KEY_J = {0x0D, KeyType::STANDARD};
@@ -75,6 +81,7 @@ namespace GestureConfig
     constexpr Key KEY_L = {0x0F, KeyType::STANDARD};
     constexpr Key KEY_SEMICOLON = {0x33, KeyType::STANDARD};
     constexpr Key KEY_APOSTROPHE = {0x34, KeyType::STANDARD};
+    constexpr Key KEY_ENTER = {0x28, KeyType::STANDARD};
     
     constexpr Key KEY_N = {0x11, KeyType::STANDARD};
     constexpr Key KEY_M = {0x10, KeyType::STANDARD};
@@ -86,41 +93,41 @@ namespace GestureConfig
     constexpr Key KEY_RALT = {0x40, KeyType::MODIFIER};
     constexpr Key KEY_RCTRL = {0x10, KeyType::MODIFIER};
 
-    constexpr Key KEY_MAP[4][4][2] = {
+    constexpr Key KEY_MAP[4][4][3] = {
         //--------------------------INDEX--------------------------
         {
             // MAIN | ALT
-            {KEY_7, KEY_6}, // NUM
-            {KEY_U, KEY_Y}, // TOP
-            {KEY_J, KEY_H}, // HOME
-            {KEY_M, KEY_N}  // BOTTOM
+            {KEY_7, KEY_6, KEY_NONE},  // NUM
+            {KEY_U, KEY_Y, KEY_NONE},  // TOP
+            {KEY_J, KEY_H, KEY_NONE},  // HOME
+            {KEY_M, KEY_N, KEY_NONE},  // BOTTOM
         },
 
         //-------------------------MIDDLE--------------------------
         {
             // MAIN | ALT (NONE)
-            {KEY_8, KEY_NONE},    // NUM
-            {KEY_I, KEY_NONE},    // TOP
-            {KEY_K, KEY_NONE},    // HOME
-            {KEY_COMMA, KEY_NONE} // BOTTOM
+            {KEY_8, KEY_NONE, KEY_NONE},     // NUM
+            {KEY_I, KEY_NONE, KEY_NONE},     // TOP
+            {KEY_K, KEY_NONE, KEY_NONE},     // HOME
+            {KEY_COMMA, KEY_NONE, KEY_NONE}, // BOTTOM
         },
 
         //---------------------------RING--------------------------
         {
-            // MAIN | ALT (NONE)
-            {KEY_9, KEY_NONE},     // NUM
-            {KEY_O, KEY_NONE},     // TOP
-            {KEY_L, KEY_NONE},     // HOME
-            {KEY_PERIOD, KEY_NONE} // BOTTOM
+            // MAIN | ALT 
+            {KEY_9, KEY_BACKSPACE, KEY_NONE},      // NUM
+            {KEY_O, KEY_BACKSLASH, KEY_NONE},      // TOP
+            {KEY_L, KEY_ENTER, KEY_NONE},      // HOME
+            {KEY_PERIOD, KEY_NONE, KEY_NONE}, // BOTTOM
         },
 
         //--------------------------PINKY--------------------------
         {
             // MAIN | ALT
-            {KEY_0, KEY_MINUS},              // NUM
-            {KEY_P, KEY_LEFT_BRACKET},       // TOP
-            {KEY_SEMICOLON, KEY_APOSTROPHE}, // HOME
-            {KEY_FWSLASH, KEY_RSHIFT}        // BOTTOM
+            {KEY_0, KEY_MINUS, KEY_EQUALS},               // NUM
+            {KEY_P, KEY_LEFT_BRACKET, KEY_RIGHT_BRACKET}, // TOP
+            {KEY_SEMICOLON, KEY_APOSTROPHE, KEY_APOSTROPHE},   // HOME
+            {KEY_FWSLASH, KEY_RSHIFT, KEY_RSHIFT},        // BOTTOM
         }
     };
 
@@ -133,6 +140,7 @@ namespace GestureConfig
         .homeValAlt = 2425,
 
         .altColVal = 5.5f,
+        .farAltVal = -1,
 
         .rowSensor = 7,
         .colSensor = 6,
@@ -145,7 +153,8 @@ namespace GestureConfig
         .bottomValAlt = 2530,
         .homeValAlt = 2360,
 
-        .altColVal = 9999.0f,
+        .altColVal = 0.0f,
+        .farAltVal = -1,
 
         .rowSensor = 8,
         .colSensor = -1,
@@ -155,10 +164,11 @@ namespace GestureConfig
         .bottomValMain = 2655,
         .homeValMain = 2510,
 
-        .bottomValAlt = 2610,
-        .homeValAlt = 2470,
+        .bottomValAlt = 2655,
+        .homeValAlt = 2510,
 
-        .altColVal = 9999.0f,
+        .altColVal = -4.0f,
+        .farAltVal = -1,
 
         .rowSensor = 9,
         .colSensor = -1,
@@ -172,6 +182,7 @@ namespace GestureConfig
         .homeValAlt = 2445,
 
         .altColVal = -4.0f,
+        .farAltVal = 1475,
 
         .rowSensor = 10,
         .colSensor = 11,
