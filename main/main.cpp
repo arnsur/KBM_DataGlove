@@ -5,8 +5,38 @@
 
 #include "board_config.hpp"
 #include "battery_manager.hpp"
+#include "hal_imu.hpp"
+
+extern "C"
+{
+#include "sh2.h"
+#include "sh2_hal.h"
+#include "sh2_err.h"
+#include "sh2_SensorValue.h"
+}
 
 static i2c_master_bus_handle_t master_bus_handle;
+
+void sensor_task(void *pvParameters)
+{
+    HalImu::init();
+
+    while (1)
+    {
+        while (HalImu::is_data_ready())
+        {
+            sh2_service();
+        }
+
+        float x, y, z, w;
+        if (HalImu::quaternion(x, y, z, w))
+        {
+            printf("X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f\n", x, y, z, w);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }   
+}
 
 void battery_task(void *pvParameters)
 {
@@ -42,6 +72,16 @@ extern "C" void app_main(void)
         4096,
         NULL,
         3,
+        NULL,
+        1
+    );
+
+    xTaskCreatePinnedToCore(
+        sensor_task,
+        "Sensor Task",
+        8192,
+        NULL,
+        5,
         NULL,
         1
     );
