@@ -1,12 +1,16 @@
-#include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "driver/i2c_master.h"
+#include "driver/i2c_types.h"
 
+#include "board_config.hpp"
 #include "battery_manager.hpp"
+
+static i2c_master_bus_handle_t master_bus_handle;
 
 void battery_task(void *pvParameters)
 {
-    BatteryManager::init();
+    BatteryManager::init(*(i2c_master_bus_handle_t *)pvParameters);
     
     BatteryManager::BatteryDetails details;
 
@@ -22,11 +26,21 @@ void battery_task(void *pvParameters)
 
 extern "C" void app_main(void)
 {
+    i2c_master_bus_config_t master_bus_config = {};
+    master_bus_config.i2c_port = 0;
+    master_bus_config.sda_io_num = BoardConfig::I2C_SDA;
+    master_bus_config.scl_io_num = BoardConfig::I2C_SCL;
+    master_bus_config.clk_source = I2C_CLK_SRC_DEFAULT;
+    master_bus_config.glitch_ignore_cnt = 0;
+    master_bus_config.intr_priority = 0;
+    master_bus_config.flags.enable_internal_pullup = false;
+    ESP_ERROR_CHECK(i2c_new_master_bus(&master_bus_config, &master_bus_handle));
+
     xTaskCreatePinnedToCore(
         battery_task,
         "Battery Task",
         4096,
-        NULL,
+        &master_bus_handle,
         3,
         NULL,
         1

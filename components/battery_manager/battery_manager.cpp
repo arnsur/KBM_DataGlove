@@ -1,7 +1,6 @@
-#include "driver/i2c_master.h"
-#include "driver/i2c_types.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "driver/gpio.h"
 
 #include "board_config.hpp"
 #include "battery_manager.hpp"
@@ -22,41 +21,40 @@ namespace BatteryManager
     static constexpr uint16_t ICHGTERM = (uint16_t)(IFULL_MILLIAMP * R_SENSE_MILLIOHM / 1.5625f);
     static constexpr uint16_t V_EMPTY = ((BATT_EMPTY_MILLIV / 10) << 7) | (3880 / 40);
 
-    static i2c_master_bus_handle_t master_bus_handle;
-    static i2c_master_dev_handle_t device_handle;
+    static i2c_master_dev_handle_t chrg_device_handle;
     
     /**
-     * @brief Writes a value to a register
+     * @brief Writes a value to a register on the MAX charger
      * 
      * @param reg register to write to
      * @param value value to write
      */
-    void write_register(uint8_t reg, uint16_t value)
+    void chrg_write_register(uint8_t reg, uint16_t value)
     {
         uint8_t write_buf[3];
         write_buf[0] = reg;
         write_buf[1] = (uint8_t)(value & 0xFF);
         write_buf[2] = (uint8_t)(value >> 8);
 
-        ESP_ERROR_CHECK(i2c_master_transmit(device_handle, write_buf, 3, -1));
+        ESP_ERROR_CHECK(i2c_master_transmit(chrg_device_handle, write_buf, 3, -1));
     }
 
     /**
-     * @brief Read the value at a register
+     * @brief Read the value at a register on the MAX charger
      * 
      * @param reg register to read from
      * @return uint16_t
      */
-    uint16_t read_register(uint8_t reg)
+    uint16_t chrg_read_register(uint8_t reg)
     {
         uint8_t read_buf[2];
 
-        ESP_ERROR_CHECK(i2c_master_transmit_receive(device_handle, &reg, 1, read_buf, 2, -1));
+        ESP_ERROR_CHECK(i2c_master_transmit_receive(chrg_device_handle, &reg, 1, read_buf, 2, -1));
         return ((uint16_t)read_buf[1] << 8) | (uint16_t)read_buf[0];
     }
 
     /**
-     * @brief Writes a value to a register and verifies if it has been written correctly
+     * @brief Writes a value to a register on the MAX charger and verifies if it has been written correctly
      * 
      * @param reg register to write to
      * @param value value to write
@@ -68,66 +66,75 @@ namespace BatteryManager
 
         do
         {
-            write_register(reg, value);
+            chrg_write_register(reg, value);
             vTaskDelay(pdMS_TO_TICKS(1));
-            reg_value_read = read_register(reg);
+            reg_value_read = chrg_read_register(reg);
         }
         while (value != reg_value_read && attempts++ < 3);
     }
 
     /**
-     * @brief Initializes the IC's registers when the POR bit is 1. Does nothing otherwise.
+     * @brief Initializes the MAX IC's registers when the POR bit is 1 or if the battery's stored nominal capacity value is mismatched. Does nothing otherwise.
      * 
      */
-    void init_ic()
+    void init_chrg_ic()
     {
-        if ((read_register(0x00) & 0x0002) != 0 || read_register(0x18) != DESIGN_CAP)
+        if ((chrg_read_register(0x00) & 0x0002) != 0 || chrg_read_register(0x18) != DESIGN_CAP)
         {
-            while(read_register(0x3D) & 1) vTaskDelay(pdMS_TO_TICKS(10));
+            while(chrg_read_register(0x3D) & 1) vTaskDelay(pdMS_TO_TICKS(10));
 
-            uint16_t hib_cfg = read_register(0xBA);
-            write_register(0x60, 0x90);
-            write_register(0xBA, 0x00);
-            write_register(0x60, 0x00);
+            uint16_t hib_cfg = chrg_read_register(0xBA);
+            chrg_write_register(0x60, 0x90);
+            chrg_write_register(0xBA, 0x00);
+            chrg_write_register(0x60, 0x00);
 
-            write_register(0x18, DESIGN_CAP);
-            write_register(0x1E, ICHGTERM);
-            write_register(0x3A, V_EMPTY);
+            chrg_write_register(0x18, DESIGN_CAP);
+            chrg_write_register(0x1E, ICHGTERM);
+            chrg_write_register(0x3A, V_EMPTY);
 
-            write_register(0xDB, 0x8000);
+            chrg_write_register(0xDB, 0x8000);
 
-            while (read_register(0xDB) & 0x8000) vTaskDelay(pdMS_TO_TICKS(10));
+            while (chrg_read_register(0xDB) & 0x8000) vTaskDelay(pdMS_TO_TICKS(10));
 
-            write_register(0xBA, hib_cfg);
+            chrg_write_register(0xBA, hib_cfg);
 
             // Reset POR bit and verify
-            write_verify_register(0x00, read_register(0x00) & 0xFFFD);
+            write_verify_register(0x00, chrg_read_register(0x00) & 0xFFFD);
         }
     }
 
     /**
-     * @brief Initializes I2C bus and device. Initializes the IC's registers after doing so.
+     * @brief Sets the BQ25040 charge mode to ISET Programmed. Initializes I2C bus and adds the MAX IC to the bus. Initializes the IC's registers after doing so.
      * 
      */
-    void init()
+    void init(i2c_master_bus_handle_t master_bus_handle)
     {
-        i2c_master_bus_config_t master_bus_config = {};
-        master_bus_config.i2c_port = 0;
-        master_bus_config.sda_io_num = BoardConfig::I2C_SDA;
-        master_bus_config.scl_io_num = BoardConfig::I2C_SCL;
-        master_bus_config.clk_source = I2C_CLK_SRC_DEFAULT;
-        master_bus_config.glitch_ignore_cnt = 0;
-        master_bus_config.intr_priority = 0;
-        master_bus_config.flags.enable_internal_pullup = false;
-        ESP_ERROR_CHECK(i2c_new_master_bus(&master_bus_config, &master_bus_handle));
+        // Configure EN/SET on BQ25040
+        gpio_config_t chg_en_set_pin_config = {};
+        chg_en_set_pin_config.pin_bit_mask = (1ULL << BoardConfig::CHG_EN_SET);
+        chg_en_set_pin_config.mode = GPIO_MODE_OUTPUT;
+        chg_en_set_pin_config.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        chg_en_set_pin_config.pull_up_en = GPIO_PULLUP_DISABLE;
+        chg_en_set_pin_config.intr_type = GPIO_INTR_DISABLE;
+        ESP_ERROR_CHECK(gpio_config(&chg_en_set_pin_config));
 
+        gpio_set_level(BoardConfig::CHG_EN_SET, 1); // Clear pin
+        esp_rom_delay_us(2000);
+        gpio_set_level(BoardConfig::CHG_EN_SET, 0); // Wait for deglitch to expire
+        esp_rom_delay_us(200);
+        gpio_set_level(BoardConfig::CHG_EN_SET, 1); // Send HIGH pulse for 400 us
+        esp_rom_delay_us(400);
+        gpio_set_level(BoardConfig::CHG_EN_SET, 0); // Hold LOW for 400 us. Enters ISET Programmed mode.
+        esp_rom_delay_us(400);
+
+        // Add MAX IC to I2C master bus
         i2c_device_config_t device_config = {};
         device_config.dev_addr_length = I2C_ADDR_BIT_LEN_7;
         device_config.device_address = BoardConfig::I2C_MAX_ADDR;
         device_config.scl_speed_hz = 400'000;
-        ESP_ERROR_CHECK(i2c_master_bus_add_device(master_bus_handle, &device_config, &device_handle));
+        ESP_ERROR_CHECK(i2c_master_bus_add_device(master_bus_handle, &device_config, &chrg_device_handle));
 
-        init_ic();
+        init_chrg_ic();
     }
 
     /**
@@ -137,11 +144,11 @@ namespace BatteryManager
      */
     void battery_details(BatteryDetails &details)
     {
-        init_ic();
+        init_chrg_ic();
 
-        uint16_t raw_soc = read_register(0x06);
+        uint16_t raw_soc = chrg_read_register(0x06);
 
-        details.capacity_mah = read_register(0x05) * CAP_LSB_SCALED;
+        details.capacity_mah = chrg_read_register(0x05) * CAP_LSB_SCALED;
         details.pct = (raw_soc >> 8) + (raw_soc & 0xFF)/256.0f;
     }
 }
