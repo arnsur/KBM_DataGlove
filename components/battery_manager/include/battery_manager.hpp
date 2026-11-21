@@ -11,7 +11,7 @@ namespace BatteryManager{
         float pct;
     };
 
-    void init(i2c_master_bus_handle_t master_bus_handle);
+    void init();
 
     void battery_details(BatteryDetails &details);
 }

@@ -10,7 +10,7 @@ static i2c_master_bus_handle_t master_bus_handle;
 
 void battery_task(void *pvParameters)
 {
-    BatteryManager::init(*(i2c_master_bus_handle_t *)pvParameters);
+    BatteryManager::init();
     
     BatteryManager::BatteryDetails details;
 
@@ -40,7 +40,7 @@ extern "C" void app_main(void)
         battery_task,
         "Battery Task",
         4096,
-        &master_bus_handle,
+        NULL,
         3,
         NULL,
         1

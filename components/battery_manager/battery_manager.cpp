@@ -107,9 +107,9 @@ namespace BatteryManager
      * @brief Sets the BQ25040 charge mode to ISET Programmed. Initializes I2C bus and adds the MAX IC to the bus. Initializes the IC's registers after doing so.
      * 
      */
-    void init(i2c_master_bus_handle_t master_bus_handle)
+    void init()
     {
-        // Configure EN/SET on BQ25040
+        // Configure EN/SET pin on BQ25040
         gpio_config_t chg_en_set_pin_config = {};
         chg_en_set_pin_config.pin_bit_mask = (1ULL << BoardConfig::CHG_EN_SET);
         chg_en_set_pin_config.mode = GPIO_MODE_OUTPUT;
@@ -132,6 +132,8 @@ namespace BatteryManager
         device_config.dev_addr_length = I2C_ADDR_BIT_LEN_7;
         device_config.device_address = BoardConfig::I2C_MAX_ADDR;
         device_config.scl_speed_hz = 400'000;
+        i2c_master_bus_handle_t master_bus_handle;
+        i2c_master_get_bus_handle(0, &master_bus_handle);
         ESP_ERROR_CHECK(i2c_master_bus_add_device(master_bus_handle, &device_config, &chrg_device_handle));
 
         init_chrg_ic();
