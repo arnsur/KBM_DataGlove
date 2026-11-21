@@ -33,8 +33,6 @@ void sensor_task(void *pvParameters)
         {
             printf("X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f\n", x, y, z, w);
         }
-
-        vTaskDelay(pdMS_TO_TICKS(10));
     }   
 }
 
