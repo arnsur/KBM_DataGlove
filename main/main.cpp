@@ -23,6 +23,11 @@ void sensor_task(void *pvParameters)
 
     while (1)
     {
+        if (!HalImu::is_data_ready())
+        {
+            ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(100));
+        }
+
         while (HalImu::is_data_ready())
         {
             sh2_service();

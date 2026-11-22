@@ -21,7 +21,7 @@ namespace BatteryManager
     static constexpr uint16_t ICHGTERM = (uint16_t)(IFULL_MILLIAMP * R_SENSE_MILLIOHM / 1.5625f);
     static constexpr uint16_t V_EMPTY = ((BATT_EMPTY_MILLIV / 10) << 7) | (3880 / 40);
 
-    static i2c_master_dev_handle_t chrg_device_handle;
+    static i2c_master_dev_handle_t chrg_device_handle = nullptr;
     
     /**
      * @brief Writes a value to a register on the MAX charger
@@ -132,8 +132,8 @@ namespace BatteryManager
         device_config.dev_addr_length = I2C_ADDR_BIT_LEN_7;
         device_config.device_address = BoardConfig::I2C_MAX_ADDR;
         device_config.scl_speed_hz = 400'000;
-        i2c_master_bus_handle_t master_bus_handle;
-        i2c_master_get_bus_handle(0, &master_bus_handle);
+        i2c_master_bus_handle_t master_bus_handle = nullptr;
+        ESP_ERROR_CHECK(i2c_master_get_bus_handle(0, &master_bus_handle));
         ESP_ERROR_CHECK(i2c_master_bus_add_device(master_bus_handle, &device_config, &chrg_device_handle));
 
         init_chrg_ic();

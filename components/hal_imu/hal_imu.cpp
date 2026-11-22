@@ -29,7 +29,19 @@ namespace HalImu
 
     sh2_Hal_t hal = {};
 
-    static i2c_master_dev_handle_t imu_device_handle;
+    static i2c_master_dev_handle_t imu_device_handle = nullptr;
+
+    static TaskHandle_t sensor_task_handle = nullptr;
+
+    static void IRAM_ATTR imu_int_isr_handler(void *arg)
+    {
+        BaseType_t higher_priority_task_woken = pdFALSE;
+        if (sensor_task_handle != nullptr)
+        {
+            vTaskNotifyGiveFromISR(sensor_task_handle, &higher_priority_task_woken);
+            portYIELD_FROM_ISR(higher_priority_task_woken);
+        }
+    }
 
     int open(sh2_Hal_t *self)
     {
@@ -71,8 +83,8 @@ namespace HalImu
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));
-        i2c_master_bus_handle_t master_bus_handle;
-        i2c_master_get_bus_handle(0, &master_bus_handle);
+        i2c_master_bus_handle_t master_bus_handle = nullptr;
+        ESP_ERROR_CHECK(i2c_master_get_bus_handle(0, &master_bus_handle));
 
         i2c_device_config_t device_config = {};
         device_config.dev_addr_length = I2C_ADDR_BIT_LEN_7;
@@ -177,6 +189,12 @@ namespace HalImu
             }
             vTaskDelay(pdMS_TO_TICKS(15));
         }
+
+        sensor_task_handle = xTaskGetCurrentTaskHandle();
+
+        ESP_ERROR_CHECK(gpio_install_isr_service(0));
+        ESP_ERROR_CHECK(gpio_set_intr_type(BoardConfig::IMU_H_INTN, GPIO_INTR_NEGEDGE));
+        ESP_ERROR_CHECK(gpio_isr_handler_add(BoardConfig::IMU_H_INTN, imu_int_isr_handler, nullptr));
 
         sh2_setSensorCallback(callback, &data);
 
