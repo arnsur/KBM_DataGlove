@@ -10,7 +10,7 @@ namespace BoardConfig
     constexpr gpio_num_t IMU_NRST = GPIO_NUM_2;
     
     // CD74HC4067SM MUX
-    constexpr gpio_num_t MUX_COM = GPIO_NUM_4;
+    constexpr adc_channel_t MUX_COM = ADC_CHANNEL_3;
     constexpr gpio_num_t MUX_S0 = GPIO_NUM_15;
     constexpr gpio_num_t MUX_S1 = GPIO_NUM_16;
     constexpr gpio_num_t MUX_S2 = GPIO_NUM_17;

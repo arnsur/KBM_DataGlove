@@ -35,6 +35,7 @@ QueueHandle_t ui_batt_queue = xQueueCreate(1, sizeof(BatteryManager::BatteryDeta
 void sensor_task(void *pvParameters)
 {
     HalImu::init();
+    HalAnalog::init();
 
     GloveState state = {};
     while (1)
@@ -58,7 +59,7 @@ void sensor_task(void *pvParameters)
             state.q_w = w;
         }
 
-        // Add analog behavior
+        state.sensors = HalAnalog::sensor_values();
 
         xQueueOverwrite(gesture_state_queue, &state);
         xQueueOverwrite(ui_state_queue, &state);
@@ -84,16 +85,22 @@ void battery_task(void *pvParameters)
 // Just for queue testing at the moment
 void disp_task(void *pvParameters)
 {
-    GloveState state;
-    BatteryManager::BatteryDetails batt_details;
+    GloveState state = {};
+    BatteryManager::BatteryDetails batt_details = {};
 
     while(1)
     {
         xQueueReceive(ui_state_queue, &state, 0);
         xQueueReceive(ui_batt_queue, &batt_details, 0);
 
-        printf("Pct: %f%% | Capacity: %u mAh | X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f\n",
-            batt_details.pct, batt_details.capacity_mah, state.q_x, state.q_y, state.q_z, state.q_w);
+        // printf("Pct: %f%% | Capacity: %u mAh | X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f\n",
+        //     batt_details.pct, batt_details.capacity_mah, state.q_x, state.q_y, state.q_z, state.q_w);
+
+        // for (int i = 0; i < 10; i++)
+        // {
+        //     printf("| %d: %u |", i, state.sensors[i]);
+        // }
+        // printf("\n");
 
         vTaskDelay(pdMS_TO_TICKS(33));
     }
