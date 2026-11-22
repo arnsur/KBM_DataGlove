@@ -9,6 +9,7 @@ namespace BatteryManager{
     {
         uint16_t capacity_mah;
         float pct;
+        int16_t i_chrg_ma;
     };
 
     void init();

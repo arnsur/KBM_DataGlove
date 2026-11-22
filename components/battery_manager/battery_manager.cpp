@@ -15,10 +15,11 @@ namespace BatteryManager
     static constexpr uint16_t BATT_RECOVERY_MILLIV = 3880;
     
     static constexpr float IFULL_MILLIAMP = (R_IFULL * 0.01f / 200) * (530.0f/R_ISET) * 1000;
-    static constexpr float CAP_LSB_SCALED = 5.0 / R_SENSE_MILLIOHM; // Scaled 1,000,000x
+    static constexpr float CAP_LSB = 5.0f / R_SENSE_MILLIOHM;
+    static constexpr float CURRENT_LSB = 1.5625f / R_SENSE_MILLIOHM;
 
-    static constexpr uint16_t DESIGN_CAP = (uint16_t)(BATTERY_CAP_MILLIAH / CAP_LSB_SCALED);
-    static constexpr uint16_t ICHGTERM = (uint16_t)(IFULL_MILLIAMP * R_SENSE_MILLIOHM / 1.5625f);
+    static constexpr uint16_t DESIGN_CAP = (uint16_t)(BATTERY_CAP_MILLIAH / CAP_LSB);
+    static constexpr uint16_t ICHGTERM = (uint16_t)(IFULL_MILLIAMP / CAP_LSB);
     static constexpr uint16_t V_EMPTY = ((BATT_EMPTY_MILLIV / 10) << 7) | (3880 / 40);
 
     static i2c_master_dev_handle_t chrg_device_handle = nullptr;
@@ -150,7 +151,8 @@ namespace BatteryManager
 
         uint16_t raw_soc = chrg_read_register(0x06);
 
-        details.capacity_mah = chrg_read_register(0x05) * CAP_LSB_SCALED;
+        details.capacity_mah = chrg_read_register(0x05) * CAP_LSB;
         details.pct = (raw_soc >> 8) + (raw_soc & 0xFF)/256.0f;
+        details.i_chrg_ma = (int16_t)chrg_read_register(0x0A) * CURRENT_LSB;
     }
 }

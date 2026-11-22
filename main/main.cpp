@@ -85,6 +85,8 @@ void battery_task(void *pvParameters)
 // Just for queue testing at the moment
 void disp_task(void *pvParameters)
 {
+    TickType_t last_wake_time = xTaskGetTickCount();
+
     GloveState state = {};
     BatteryManager::BatteryDetails batt_details = {};
 
@@ -93,8 +95,8 @@ void disp_task(void *pvParameters)
         xQueueReceive(ui_state_queue, &state, 0);
         xQueueReceive(ui_batt_queue, &batt_details, 0);
 
-        // printf("Pct: %f%% | Capacity: %u mAh | X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f\n",
-        //     batt_details.pct, batt_details.capacity_mah, state.q_x, state.q_y, state.q_z, state.q_w);
+        // printf("Pct: %f%% | Capacity: %u mAh | I_chrg: %d mA | X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f\n",
+        //     batt_details.pct, batt_details.capacity_mah, batt_details.i_chrg_ma, state.q_x, state.q_y, state.q_z, state.q_w);
 
         // for (int i = 0; i < 10; i++)
         // {
@@ -102,7 +104,7 @@ void disp_task(void *pvParameters)
         // }
         // printf("\n");
 
-        vTaskDelay(pdMS_TO_TICKS(33));
+        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(33));
     }
 }
 
