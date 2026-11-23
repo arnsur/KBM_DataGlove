@@ -7,9 +7,9 @@
 namespace BatteryManager{
     struct BatteryDetails
     {
-        uint16_t capacity_mah;
         float pct;
         int16_t i_chrg_ma;
+        uint16_t capacity_mah;
     };
 
     void init();

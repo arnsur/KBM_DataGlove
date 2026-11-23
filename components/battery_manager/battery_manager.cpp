@@ -119,8 +119,6 @@ namespace BatteryManager
         chg_en_set_pin_config.intr_type = GPIO_INTR_DISABLE;
         ESP_ERROR_CHECK(gpio_config(&chg_en_set_pin_config));
 
-        gpio_set_level(BoardConfig::CHG_EN_SET, 1); // Clear pin
-        esp_rom_delay_us(2000);
         gpio_set_level(BoardConfig::CHG_EN_SET, 0); // Wait for deglitch to expire
         esp_rom_delay_us(200);
         gpio_set_level(BoardConfig::CHG_EN_SET, 1); // Send HIGH pulse for 400 us

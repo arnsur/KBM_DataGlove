@@ -28,9 +28,9 @@ struct GloveState
 
 static i2c_master_bus_handle_t master_bus_handle;
 
-QueueHandle_t gesture_state_queue = xQueueCreate(1, sizeof(GloveState));
-QueueHandle_t ui_state_queue = xQueueCreate(1, sizeof(GloveState));
-QueueHandle_t ui_batt_queue = xQueueCreate(1, sizeof(BatteryManager::BatteryDetails));
+static QueueHandle_t gesture_state_queue = nullptr;
+static QueueHandle_t ui_state_queue = nullptr;
+static QueueHandle_t ui_batt_queue = nullptr;
 
 void sensor_task(void *pvParameters)
 {
@@ -110,6 +110,10 @@ void disp_task(void *pvParameters)
 
 extern "C" void app_main(void)
 {
+    gesture_state_queue = xQueueCreate(1, sizeof(GloveState));
+    ui_state_queue = xQueueCreate(1, sizeof(GloveState));
+    ui_batt_queue = xQueueCreate(1, sizeof(BatteryManager::BatteryDetails));
+    
     i2c_master_bus_config_t master_bus_config = {};
     master_bus_config.i2c_port = 0;
     master_bus_config.sda_io_num = BoardConfig::I2C_SDA;
