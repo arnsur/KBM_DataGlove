@@ -72,13 +72,22 @@ void battery_task(void *pvParameters)
     
     BatteryManager::BatteryDetails batt_details;
 
+    int last_chrg_ma = 0;
+
     while(1)
     {
         BatteryManager::battery_details(batt_details);
 
         xQueueOverwrite(ui_batt_queue, &batt_details);
 
-        vTaskDelay(pdMS_TO_TICKS(10 * 1000));
+        // Put the the BQ25040 into ISET Programmed on the first loop or when a charging cable is plugged in
+        if (last_chrg_ma <= 0 && batt_details.i_chrg_ma > 0)
+        {
+            BatteryManager::select_charge_mode(BatteryManager::ChargeMode::ISET_PROGRAMMED);
+        }
+        last_chrg_ma = batt_details.i_chrg_ma;
+
+        vTaskDelay(pdMS_TO_TICKS(2 * 1000));
     }
 }
 
@@ -95,8 +104,11 @@ void disp_task(void *pvParameters)
         xQueueReceive(ui_state_queue, &state, 0);
         xQueueReceive(ui_batt_queue, &batt_details, 0);
 
-        // printf("Pct: %f%% | Capacity: %u mAh | I_chrg: %d mA | X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f\n",
-        //     batt_details.pct, batt_details.capacity_mah, batt_details.i_chrg_ma, state.q_x, state.q_y, state.q_z, state.q_w);
+        printf("Pct: %f%% | Capacity: %u mAh | I_chrg: %d mA",
+            batt_details.pct, batt_details.capacity_mah, batt_details.i_chrg_ma);
+        printf("| X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f",
+            state.q_x, state.q_y, state.q_z, state.q_w);
+        printf("\n");
 
         // for (int i = 0; i < 10; i++)
         // {

@@ -5,6 +5,14 @@
 #include "driver/i2c_types.h"
 
 namespace BatteryManager{
+    enum class ChargeMode : int8_t
+    {
+        CHRG_DISABLED = -1,
+        USB500,
+        ISET_PROGRAMMED,
+        USB100,
+    };
+
     struct BatteryDetails
     {
         float pct;
@@ -13,6 +21,8 @@ namespace BatteryManager{
     };
 
     void init();
+
+    void select_charge_mode(ChargeMode mode);
 
     void battery_details(BatteryDetails &details);
 }
