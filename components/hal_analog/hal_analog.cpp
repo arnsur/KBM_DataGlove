@@ -51,11 +51,11 @@ namespace HalAnalog
     /**
      * @brief Returns a reading of each analog sensor connected to the CD74HC4067
      * 
-     * @return SensorArray
+     * @return std::array<uint16_t, 10> 
      */
-    SensorArray sensor_values()
+    std::array<uint16_t, 10> sensor_values()
     {
-        SensorArray ret = {0};
+        std::array<uint16_t, 10> ret = {0};
 
         for (int i = 0; i < 10; i++)
         {

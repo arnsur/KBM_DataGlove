@@ -7,6 +7,7 @@
 #include "battery_manager.hpp"
 #include "hal_imu.hpp"
 #include "hal_analog.hpp"
+#include "gesture_engine.hpp"
 #include "comms.hpp"
 
 extern "C"
@@ -17,25 +18,14 @@ extern "C"
 #include "sh2_SensorValue.h"
 }
 
-struct GloveState
-{
-    HalAnalog::SensorArray sensors;
-    float q_x;
-    float q_y;
-    float q_z;
-    float q_w;
-};
-
-
 static i2c_master_bus_handle_t master_bus_handle;
 
-static QueueHandle_t gesture_state_queue = nullptr;
 static QueueHandle_t ui_state_queue = nullptr;
 static QueueHandle_t ui_batt_queue = nullptr;
 
 void sensor_task(void *pvParameters)
 {
-    GloveState state = {};
+    GestureEngine::GloveState state = {};
     while (1)
     {
         if (!HalImu::is_data_ready())
@@ -59,7 +49,7 @@ void sensor_task(void *pvParameters)
 
         state.sensors = HalAnalog::sensor_values();
 
-        xQueueOverwrite(gesture_state_queue, &state);
+        GestureEngine::queue_push_data(state);
         xQueueOverwrite(ui_state_queue, &state);
     }   
 }
@@ -87,12 +77,22 @@ void battery_task(void *pvParameters)
     }
 }
 
+void gesture_task(void *pvParameters)
+{
+    while(1)
+    {
+        GestureEngine::EngineOutput output = GestureEngine::process();
+
+        Comms::queue_push_data(output.recv_msg);
+    }
+}
+
 // Just for queue testing at the moment
 void disp_task(void *pvParameters)
 {
     TickType_t last_wake_time = xTaskGetTickCount();
 
-    GloveState state = {};
+    GestureEngine::GloveState state = {};
     BatteryManager::BatteryDetails batt_details = {};
 
     while(1)
@@ -126,8 +126,7 @@ void comms_task(void *pvParameters)
 
 extern "C" void app_main(void)
 {
-    gesture_state_queue = xQueueCreate(1, sizeof(GloveState));
-    ui_state_queue = xQueueCreate(1, sizeof(GloveState));
+    ui_state_queue = xQueueCreate(1, sizeof(GestureEngine::GloveState));
     ui_batt_queue = xQueueCreate(1, sizeof(BatteryManager::BatteryDetails));
     
     i2c_master_bus_config_t master_bus_config = {};
@@ -143,6 +142,7 @@ extern "C" void app_main(void)
     HalImu::init();
     HalAnalog::init();
     BatteryManager::init();
+    GestureEngine::init();
     Comms::init();
 
     xTaskCreatePinnedToCore(
@@ -181,6 +181,16 @@ extern "C" void app_main(void)
         8192,
         NULL,
         5,
+        NULL,
+        1
+    );
+
+    xTaskCreatePinnedToCore(
+        gesture_task,
+        "Gesture Task",
+        4096,
+        NULL,
+        4,
         NULL,
         1
     );
