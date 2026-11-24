@@ -112,7 +112,10 @@ void disp_task(void *pvParameters)
         // }
         // printf("\n");
 
-        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(33));
+        if(xTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(33)) == pdFALSE)
+        {
+            printf("DISPLAY TASK MISSED ITS DEADLINE.\n");
+        }
     }
 }
 
