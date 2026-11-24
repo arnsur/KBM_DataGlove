@@ -7,6 +7,7 @@
 #include "battery_manager.hpp"
 #include "hal_imu.hpp"
 #include "hal_analog.hpp"
+#include "comms.hpp"
 
 extern "C"
 {
@@ -34,9 +35,6 @@ static QueueHandle_t ui_batt_queue = nullptr;
 
 void sensor_task(void *pvParameters)
 {
-    HalImu::init();
-    HalAnalog::init();
-
     GloveState state = {};
     while (1)
     {
@@ -67,9 +65,7 @@ void sensor_task(void *pvParameters)
 }
 
 void battery_task(void *pvParameters)
-{
-    BatteryManager::init();
-    
+{    
     BatteryManager::BatteryDetails batt_details;
 
     int last_chrg_ma = 0;
@@ -120,6 +116,14 @@ void disp_task(void *pvParameters)
     }
 }
 
+void comms_task(void *pvParameters)
+{
+    while(1)
+    {
+        Comms::send_data();
+    }
+}
+
 extern "C" void app_main(void)
 {
     gesture_state_queue = xQueueCreate(1, sizeof(GloveState));
@@ -136,12 +140,27 @@ extern "C" void app_main(void)
     master_bus_config.flags.enable_internal_pullup = false;
     ESP_ERROR_CHECK(i2c_new_master_bus(&master_bus_config, &master_bus_handle));
 
+    HalImu::init();
+    HalAnalog::init();
+    BatteryManager::init();
+    Comms::init();
+
     xTaskCreatePinnedToCore(
         disp_task,
         "Display Task",
         8192,
         NULL,
         3,
+        NULL,
+        0
+    );
+
+    xTaskCreatePinnedToCore(
+        comms_task,
+        "Comms Task",
+        4096,
+        NULL,
+        4,
         NULL,
         0
     );
