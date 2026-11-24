@@ -170,6 +170,15 @@ namespace HalImu
         return gpio_get_level(BoardConfig::IMU_H_INTN) == 0;
     }
 
+    void enable_interrupts()
+    {
+        sensor_task_handle = xTaskGetCurrentTaskHandle();
+
+        ESP_ERROR_CHECK(gpio_install_isr_service(0));
+        ESP_ERROR_CHECK(gpio_set_intr_type(BoardConfig::IMU_H_INTN, GPIO_INTR_NEGEDGE));
+        ESP_ERROR_CHECK(gpio_isr_handler_add(BoardConfig::IMU_H_INTN, imu_int_isr_handler, nullptr));
+    }
+
     void init()
     {
         hal.open = open;
@@ -189,12 +198,6 @@ namespace HalImu
             }
             vTaskDelay(pdMS_TO_TICKS(15));
         }
-
-        sensor_task_handle = xTaskGetCurrentTaskHandle();
-
-        ESP_ERROR_CHECK(gpio_install_isr_service(0));
-        ESP_ERROR_CHECK(gpio_set_intr_type(BoardConfig::IMU_H_INTN, GPIO_INTR_NEGEDGE));
-        ESP_ERROR_CHECK(gpio_isr_handler_add(BoardConfig::IMU_H_INTN, imu_int_isr_handler, nullptr));
 
         sh2_setSensorCallback(callback, &data);
 

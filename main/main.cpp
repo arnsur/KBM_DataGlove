@@ -25,6 +25,8 @@ static QueueHandle_t ui_batt_queue = nullptr;
 
 void sensor_task(void *pvParameters)
 {
+    HalImu::enable_interrupts();
+
     GestureEngine::GloveState state = {};
     while (1)
     {
