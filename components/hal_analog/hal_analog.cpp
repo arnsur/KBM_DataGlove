@@ -10,6 +10,10 @@ namespace HalAnalog
     static adc_oneshot_unit_handle_t adc_handle = nullptr;
     static adc_cali_handle_t cali_handle = nullptr;
 
+    /**
+     * @brief Fills out necessary configs for mV calibrated ADC oneshot readings from the CD74HC4067
+     * 
+     */
     void init()
     {
         // Configure oneshot unit
@@ -43,6 +47,12 @@ namespace HalAnalog
         ESP_ERROR_CHECK(adc_cali_create_scheme_curve_fitting(&curve_cfg, &cali_handle));
     }
 
+
+    /**
+     * @brief Returns a reading of each analog sensor connected to the CD74HC4067
+     * 
+     * @return SensorArray
+     */
     SensorArray sensor_values()
     {
         SensorArray ret = {0};
