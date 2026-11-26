@@ -25,8 +25,6 @@ namespace BatteryManager
     static i2c_master_dev_handle_t chrg_device_handle = nullptr;
 
     static portMUX_TYPE chg_mux = portMUX_INITIALIZER_UNLOCKED;
-
-    
     
     /**
      * @brief Writes a value to a register on the MAX fuel gauge
