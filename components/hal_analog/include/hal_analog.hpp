@@ -8,4 +8,6 @@ namespace HalAnalog
     void init();
 
     std::array<uint16_t, 10> sensor_values();
+
+    void sleep();
 }

@@ -5,6 +5,9 @@
 #include "hal_analog.hpp"
 #include "board_config.hpp"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 namespace HalAnalog
 {
     static adc_oneshot_unit_handle_t adc_handle = nullptr;
@@ -73,5 +76,18 @@ namespace HalAnalog
         }
 
         return ret;
+    }
+
+    void sleep()
+    {
+        gpio_set_level(BoardConfig::MUX_S0, 0);
+        gpio_set_level(BoardConfig::MUX_S1, 0);
+        gpio_set_level(BoardConfig::MUX_S2, 0);
+        gpio_set_level(BoardConfig::MUX_S3, 0);
+
+        gpio_hold_en(BoardConfig::MUX_S0);
+        gpio_hold_en(BoardConfig::MUX_S1);
+        gpio_hold_en(BoardConfig::MUX_S2);
+        gpio_hold_en(BoardConfig::MUX_S3);
     }
 }

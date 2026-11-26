@@ -172,8 +172,10 @@ namespace BatteryManager
      * @brief Get battery details from the MAX fuel gauge
      * 
      * @param details struct to store the details in
+     * @return true if the device has enough charge to continue use (pct > 1)
+     * @return false if the battery has no charge left (pct <= 1)
      */
-    void battery_details(BatteryDetails &details)
+    bool battery_details(BatteryDetails &details)
     {
         init_max_ic();
 
@@ -182,5 +184,19 @@ namespace BatteryManager
         details.capacity_mah = max_read_register(0x05) * CAP_LSB;
         details.pct = (raw_soc >> 8) + (raw_soc & 0xFF)/256.0f;
         details.i_chrg_ma = (int16_t)max_read_register(0x0A) * CURRENT_LSB;
+
+        if (details.pct <= 1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    void sleep()
+    {
+        gpio_set_level(BoardConfig::CHG_EN_SET, 0);
+
+        gpio_hold_en(BoardConfig::CHG_EN_SET);
     }
 }

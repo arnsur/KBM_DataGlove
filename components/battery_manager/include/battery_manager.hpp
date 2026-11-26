@@ -24,5 +24,7 @@ namespace BatteryManager{
 
     void select_charge_mode(ChargeMode mode);
 
-    void battery_details(BatteryDetails &details);
+    bool battery_details(BatteryDetails &details);
+
+    void sleep();
 }

@@ -82,4 +82,9 @@ namespace Comms
             esp_now_send(RECV_MAC, (uint8_t *)&outgoing_message, sizeof(ReceiverMessage));
         }
     }
+
+    void sleep()
+    {
+        esp_wifi_stop();
+    }
 }

@@ -9,4 +9,6 @@ namespace Comms
     void queue_push_data(CommsProtocol::ReceiverMessage &msg);
 
     void send_data();
+
+    void sleep();
 }

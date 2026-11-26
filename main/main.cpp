@@ -2,6 +2,7 @@
 #include "freertos/task.h"
 #include "driver/i2c_master.h"
 #include "driver/i2c_types.h"
+#include "esp_sleep.h"
 
 #include "board_config.hpp"
 #include "battery_manager.hpp"
@@ -23,13 +24,32 @@ static i2c_master_bus_handle_t master_bus_handle;
 static QueueHandle_t ui_state_queue = nullptr;
 static QueueHandle_t ui_batt_queue = nullptr;
 
+static bool shutdown_requested;
+
+EventGroupHandle_t shutdown_event_group_handle = nullptr;
+constexpr static uint32_t SENSOR_SHUTDOWN_BIT = (1U << 0);
+constexpr static uint32_t GESTURE_SHUTDOWN_BIT = (1U << 1);
+constexpr static uint32_t DISP_SHUTDOWN_BIT = (1U << 2);
+constexpr static uint32_t COMMS_SHUTDOWN_BIT = (1U << 3);
+constexpr static uint32_t SHUTDOWN_GO = (SENSOR_SHUTDOWN_BIT | GESTURE_SHUTDOWN_BIT | DISP_SHUTDOWN_BIT | COMMS_SHUTDOWN_BIT);
+
 void sensor_task(void *pvParameters)
 {
+    
     HalImu::enable_interrupts();
-
+    
     GestureEngine::GloveState state = {};
     while (1)
     {
+        if (shutdown_requested)
+        {
+            HalAnalog::sleep();
+            HalImu::sleep();
+
+            xEventGroupSetBits(shutdown_event_group_handle, SENSOR_SHUTDOWN_BIT);
+            vTaskDelete(NULL);
+        }
+
         if (!HalImu::is_data_ready())
         {
             ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(100));
@@ -64,16 +84,29 @@ void battery_task(void *pvParameters)
 
     while(1)
     {
-        BatteryManager::battery_details(batt_details);
-
-        xQueueOverwrite(ui_batt_queue, &batt_details);
-
-        // Put the the BQ25040 into ISET Programmed on the first loop or when a charging cable is plugged in
-        if (last_chrg_ma <= 0 && batt_details.i_chrg_ma > 0)
+        if (!shutdown_requested)
         {
-            BatteryManager::select_charge_mode(BatteryManager::ChargeMode::ISET_PROGRAMMED);
+            shutdown_requested = (BatteryManager::battery_details(batt_details) == false);
+
+            xQueueOverwrite(ui_batt_queue, &batt_details);
+
+            // Put the the BQ25040 into ISET Programmed on the first loop or when a charging cable is plugged in
+            if (last_chrg_ma <= 0 && batt_details.i_chrg_ma > 0)
+            {
+                BatteryManager::select_charge_mode(BatteryManager::ChargeMode::ISET_PROGRAMMED);
+            }
+            last_chrg_ma = batt_details.i_chrg_ma;
         }
-        last_chrg_ma = batt_details.i_chrg_ma;
+        EventBits_t shutdown_bits = xEventGroupGetBits(shutdown_event_group_handle);
+
+        if ((shutdown_bits & SHUTDOWN_GO) == SHUTDOWN_GO)
+        {
+            BatteryManager::sleep();
+            
+            esp_deep_sleep_start();
+
+            vTaskDelete(NULL);
+        }
 
         vTaskDelay(pdMS_TO_TICKS(2 * 1000));
     }
@@ -83,6 +116,12 @@ void gesture_task(void *pvParameters)
 {
     while(1)
     {
+        if (shutdown_requested)
+        {
+            xEventGroupSetBits(shutdown_event_group_handle, GESTURE_SHUTDOWN_BIT);
+            vTaskDelete(NULL);
+        }
+
         GestureEngine::EngineOutput output = GestureEngine::process();
 
         Comms::queue_push_data(output.recv_msg);
@@ -99,6 +138,12 @@ void disp_task(void *pvParameters)
 
     while(1)
     {
+        if (shutdown_requested)
+        {
+            xEventGroupSetBits(shutdown_event_group_handle, DISP_SHUTDOWN_BIT);
+            vTaskDelete(NULL);
+        }
+
         xQueueReceive(ui_state_queue, &state, 0);
         xQueueReceive(ui_batt_queue, &batt_details, 0);
 
@@ -125,12 +170,31 @@ void comms_task(void *pvParameters)
 {
     while(1)
     {
+        if (shutdown_requested)
+        {
+            Comms::sleep();
+
+            xEventGroupSetBits(shutdown_event_group_handle, COMMS_SHUTDOWN_BIT);
+            vTaskDelete(NULL);
+        }
+
         Comms::send_data();
     }
 }
 
 extern "C" void app_main(void)
 {
+    shutdown_event_group_handle = xEventGroupCreate();
+
+    gpio_hold_dis(BoardConfig::MUX_S0);
+    gpio_hold_dis(BoardConfig::MUX_S1);
+    gpio_hold_dis(BoardConfig::MUX_S2);
+    gpio_hold_dis(BoardConfig::MUX_S3);
+
+    gpio_hold_dis(BoardConfig::IMU_NRST);
+
+    gpio_hold_dis(BoardConfig::CHG_EN_SET);
+
     ui_state_queue = xQueueCreate(1, sizeof(GestureEngine::GloveState));
     ui_batt_queue = xQueueCreate(1, sizeof(BatteryManager::BatteryDetails));
     

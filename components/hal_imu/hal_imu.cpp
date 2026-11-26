@@ -211,4 +211,11 @@ namespace HalImu
         sensor_config.sensorSpecific = 0;
         sh2_setSensorConfig(SH2_GAME_ROTATION_VECTOR, &sensor_config);
     }
+
+    void sleep()
+    {
+        gpio_set_level(BoardConfig::IMU_NRST, 0);
+
+        gpio_hold_en(BoardConfig::IMU_NRST);
+    }
 }

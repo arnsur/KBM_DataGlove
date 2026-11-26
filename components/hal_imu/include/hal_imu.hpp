@@ -9,4 +9,6 @@ namespace HalImu
     bool is_data_ready();
 
     void init();
+
+    void sleep();
 }
