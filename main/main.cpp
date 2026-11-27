@@ -9,6 +9,8 @@
 #include "hal_imu.hpp"
 #include "hal_analog.hpp"
 #include "gesture_engine.hpp"
+#include "hal_ui.hpp"
+#include "glove_ui.hpp"
 #include "comms.hpp"
 
 extern "C"
@@ -21,11 +23,11 @@ extern "C"
 
 static i2c_master_bus_handle_t master_bus_handle;
 
-static QueueHandle_t ui_state_queue = nullptr;
+static QueueHandle_t ui_sensor_queue = nullptr;
 static QueueHandle_t ui_batt_queue = nullptr;
+static QueueHandle_t ui_gesture_queue = nullptr;
 
 static bool shutdown_requested;
-
 EventGroupHandle_t shutdown_event_group_handle = nullptr;
 constexpr static uint32_t SENSOR_SHUTDOWN_BIT = (1U << 0);
 constexpr static uint32_t GESTURE_SHUTDOWN_BIT = (1U << 1);
@@ -72,7 +74,7 @@ void sensor_task(void *pvParameters)
         state.sensors = HalAnalog::sensor_values();
 
         GestureEngine::queue_push_data(state);
-        xQueueOverwrite(ui_state_queue, &state);
+        xQueueOverwrite(ui_sensor_queue, &state);
     }   
 }
 
@@ -128,13 +130,16 @@ void gesture_task(void *pvParameters)
     }
 }
 
-// Just for queue testing at the moment
 void disp_task(void *pvParameters)
 {
+    HalUI::init();
+    GloveUI::init(50);
+
     TickType_t last_wake_time = xTaskGetTickCount();
 
-    GestureEngine::GloveState state = {};
-    BatteryManager::BatteryDetails batt_details = {};
+    GestureEngine::GloveState r_state = {};
+    BatteryManager::BatteryDetails r_batt_details = {};
+    GestureEngine::UIOutput ui_output = {};
 
     while(1)
     {
@@ -144,20 +149,35 @@ void disp_task(void *pvParameters)
             vTaskDelete(NULL);
         }
 
-        xQueueReceive(ui_state_queue, &state, 0);
-        xQueueReceive(ui_batt_queue, &batt_details, 0);
+        xQueueReceive(ui_sensor_queue, &r_state, 0);
+        xQueueReceive(ui_batt_queue, &r_batt_details, 0);
+        xQueueReceive(ui_gesture_queue, &ui_output, 0);
 
-        printf("Pct: %f%% | Capacity: %u mAh | I_chrg: %d mA",
-            batt_details.pct, batt_details.capacity_mah, batt_details.i_chrg_ma);
-        printf("| X: %6.3f | Y: %6.3f | Z: %6.3f | W: %6.3f",
-            state.q_x, state.q_y, state.q_z, state.q_w);
-        printf("\n");
+        GloveUI::UIState ui_state = {};
 
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     printf("| %d: %u |", i, state.sensors[i]);
-        // }
-        // printf("\n");
+        ui_state.active_mode = ui_output.active_mode;
+        ui_state.pre_rest_mode = ui_output.pre_rest_mode;
+        ui_state.mode_substate = ui_output.mode_substate;
+        ui_state.cursor = ui_output.cursor;
+
+        GloveUI::CommsStatus comms_status; // Placeholder
+        ui_state.comms = comms_status;
+
+        ui_state.right_glove = r_state;
+        GestureEngine::GloveState l_state; // Placeholder
+        ui_state.left_glove = l_state;
+
+        ui_state.right_batt = r_batt_details;
+        BatteryManager::BatteryDetails l_batt; //Placeholder
+        ui_state.left_batt = l_batt;
+
+        GloveUI::UICommands commands;
+        GloveUI::update(ui_state, commands);
+
+        if (commands.brightness_changed)
+        {
+            HalUI::set_brightness_pct(commands.brightness_pct);
+        }
 
         if(xTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(33)) == pdFALSE)
         {
@@ -190,13 +210,12 @@ extern "C" void app_main(void)
     gpio_hold_dis(BoardConfig::MUX_S1);
     gpio_hold_dis(BoardConfig::MUX_S2);
     gpio_hold_dis(BoardConfig::MUX_S3);
-
     gpio_hold_dis(BoardConfig::IMU_NRST);
-
     gpio_hold_dis(BoardConfig::CHG_EN_SET);
 
-    ui_state_queue = xQueueCreate(1, sizeof(GestureEngine::GloveState));
+    ui_sensor_queue = xQueueCreate(1, sizeof(GestureEngine::GloveState));
     ui_batt_queue = xQueueCreate(1, sizeof(BatteryManager::BatteryDetails));
+    ui_gesture_queue = xQueueCreate(1, sizeof(GestureEngine::UIOutput));
     
     i2c_master_bus_config_t master_bus_config = {};
     master_bus_config.i2c_port = 0;

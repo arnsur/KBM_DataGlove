@@ -6,11 +6,19 @@
 #include "gesture_engine_types.hpp"
 
 namespace GestureEngine
-{
+{   
+    struct UIOutput
+    {
+        Cursor cursor;
+        InputMode active_mode;
+        InputMode pre_rest_mode;
+        const char *mode_substate = "CURSOR READY";
+    };
+
     struct EngineOutput
     {
         CommsProtocol::ReceiverMessage recv_msg;
-        Cursor cursor;
+        UIOutput ui_output;
     };
     
     void init();
