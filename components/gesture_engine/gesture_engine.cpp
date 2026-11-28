@@ -4,7 +4,7 @@
 #include "gesture_engine.hpp"
 #include "helpers/imu_processor/imu_processor.hpp"
 #include "helpers/mouse_processor/mouse_processor.hpp"
-#include "helpers/ui_mode_handler/ui_mode_handler.hpp"
+#include "helpers/mode_handlers/ui_mode_handler/ui_mode_handler.hpp"
 
 namespace GestureEngine
 {

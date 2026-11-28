@@ -3,7 +3,7 @@
 namespace UIModeHandler
 {
     static int16_t cursor_x = 160;
-    static int16_t cursor_y = 120;
+    static int16_t cursor_y = 239;
     static float ui_remainder_x = 0.0f;
     static float ui_remainder_y = 0.0f;
 
