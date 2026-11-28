@@ -7,9 +7,9 @@ namespace UIModeHandler
     static float ui_remainder_x = 0.0f;
     static float ui_remainder_y = 0.0f;
 
-    GestureEngine::Cursor handle(const MouseProcessor::MouseDelta &d_mouse, const std::array<uint16_t, 10> sensors)
+    GestureEngine::Cursor handle(const MouseProcessor::MouseDelta &d_mouse, const std::array<uint16_t, 10> sensors, GestureEngine::EngineOutput &out)
     {
-        GestureEngine::Cursor ret = {};
+        GestureEngine::Cursor ret;
 
         float exact_x = d_mouse.x * 0.2f + ui_remainder_x;
         float exact_y = d_mouse.y * 0.2f + ui_remainder_y;
@@ -28,6 +28,8 @@ namespace UIModeHandler
         ret.x = cursor_x;
         ret.y = cursor_y;
         ret.is_pressed = (sensors[0] > 1000 /*|| sensors[5] > 123456*/);
+
+        out.ui_output.cursor = ret;
 
         return ret;
     }

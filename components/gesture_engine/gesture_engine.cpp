@@ -10,6 +10,8 @@ namespace GestureEngine
 {
     static QueueHandle_t gesture_state_queue = nullptr;
 
+    static Cursor last_cursor;
+
     void init()
     {
         gesture_state_queue = xQueueCreate(1, sizeof(GloveState));
@@ -31,10 +33,24 @@ namespace GestureEngine
             IMUProcessor::IMUEuler euler = IMUProcessor::process(state.q_x, state.q_y, state.q_z, state.q_w);
 
             MouseProcessor::MouseDelta d_mouse = MouseProcessor::mouse_delta(euler);
-
-            ret.ui_output.cursor = UIModeHandler::handle(d_mouse, state.sensors);
-
+            
             ret.ui_output.active_mode = InputMode::UI;
+
+            switch (ret.ui_output.active_mode)
+            {
+            case InputMode::MOUSE:
+                ret.ui_output.cursor = last_cursor;
+                break;
+            case InputMode::UI:
+                last_cursor = UIModeHandler::handle(d_mouse, state.sensors, ret);
+                break;
+            case InputMode::KEYBOARD:
+                ret.ui_output.cursor = last_cursor;
+                break;
+            case InputMode::REST:
+                ret.ui_output.cursor = last_cursor;
+                break;
+            }
         }
 
         return ret;
