@@ -5,6 +5,7 @@
 #include "helpers/imu_processor/imu_processor.hpp"
 #include "helpers/mouse_processor/mouse_processor.hpp"
 #include "helpers/mode_handlers/ui_mode_handler/ui_mode_handler.hpp"
+#include "helpers/mode_handlers/mouse_mode_handler/mouse_mode_handler.hpp"
 
 namespace GestureEngine
 {
@@ -34,11 +35,12 @@ namespace GestureEngine
 
             MouseProcessor::MouseDelta d_mouse = MouseProcessor::mouse_delta(euler);
             
-            ret.ui_output.active_mode = InputMode::UI;
+            ret.ui_output.active_mode = InputMode::MOUSE;
 
             switch (ret.ui_output.active_mode)
             {
             case InputMode::MOUSE:
+                MouseModeHandler::handle(d_mouse, ret);
                 ret.ui_output.cursor = last_cursor;
                 break;
             case InputMode::UI:

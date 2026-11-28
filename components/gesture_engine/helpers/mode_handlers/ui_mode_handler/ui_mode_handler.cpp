@@ -1,4 +1,5 @@
 #include "ui_mode_handler.hpp"
+#include "gesture_config.hpp"
 
 namespace UIModeHandler
 {
@@ -11,8 +12,8 @@ namespace UIModeHandler
     {
         GestureEngine::Cursor ret;
 
-        float exact_x = d_mouse.x * 0.2f + ui_remainder_x;
-        float exact_y = d_mouse.y * 0.2f + ui_remainder_y;
+        float exact_x = d_mouse.x * UI_MOUSE_SENS_MULT + ui_remainder_x;
+        float exact_y = d_mouse.y * UI_MOUSE_SENS_MULT + ui_remainder_y;
 
         cursor_x += (int16_t)exact_x;
         cursor_y += (int16_t)exact_y;

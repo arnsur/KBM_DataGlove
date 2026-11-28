@@ -4,6 +4,7 @@ idf_component_register(
         "helpers/imu_processor/imu_processor.cpp"
         "helpers/mouse_processor/mouse_processor.cpp"
         "helpers/mode_handlers/ui_mode_handler/ui_mode_handler.cpp"
+        "helpers/mode_handlers/mouse_mode_handler/mouse_mode_handler.cpp"
                     
     INCLUDE_DIRS
         "include"
