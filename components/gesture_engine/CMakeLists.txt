@@ -3,6 +3,7 @@ idf_component_register(
         "gesture_engine.cpp"
         "helpers/imu_processor/imu_processor.cpp"
         "helpers/mouse_processor/mouse_processor.cpp"
+        "helpers/input_state_manager/input_state_manager.cpp"
         "helpers/mode_handlers/ui_mode_handler/ui_mode_handler.cpp"
         "helpers/mode_handlers/mouse_mode_handler/mouse_mode_handler.cpp"
                     
