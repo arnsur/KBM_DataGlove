@@ -6,7 +6,7 @@
 #include "gesture_engine_types.hpp"
 
 namespace GestureEngine
-{   
+{
     struct UIOutput
     {
         Cursor cursor;

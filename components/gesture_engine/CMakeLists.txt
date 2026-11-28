@@ -1,3 +1,16 @@
-idf_component_register(SRCS "gesture_engine.cpp"
-                    INCLUDE_DIRS "include"
-                    REQUIRES board_config comms_protocol)
+idf_component_register(
+    SRCS
+        "gesture_engine.cpp"
+        "helpers/imu_processor/imu_processor.cpp"
+        "helpers/mouse_processor/mouse_processor.cpp"
+                    
+    INCLUDE_DIRS
+        "include"
+
+    PRIV_INCLUDE_DIRS
+        "."
+                    
+    REQUIRES
+        board_config
+        comms_protocol
+)

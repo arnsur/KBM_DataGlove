@@ -126,6 +126,8 @@ void gesture_task(void *pvParameters)
 
         GestureEngine::EngineOutput output = GestureEngine::process();
 
+        xQueueOverwrite(ui_gesture_queue, &output.ui_output);
+
         Comms::queue_push_data(output.recv_msg);
     }
 }
